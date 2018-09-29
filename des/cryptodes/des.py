@@ -10,37 +10,40 @@ def shift_left(data: bitarray, size) -> bitarray:
     for ind in range(0, len(data) - size):
         res[ind] = data[ind + size]
 
-    for ind in range(len(data) - size):
+    for ind in range(len(data) - size, len(data)):
         res[ind] = 0
 
     return res
 
 
-def create_keys(key_bytes: bitarray) -> list:
-    while len(key_bytes) < 56:
-        key_bytes.append(0)
+def create_keys(key_bits: bitarray) -> list:
+    while len(key_bits) < 56:
+        key_bits.append(0)
 
-    key_bytes.insert(7, 1)
-    key_bytes.insert(15, 1)
-    key_bytes.insert(23, 1)
-    key_bytes.insert(31, 1)
-    key_bytes.insert(39, 1)
-    key_bytes.insert(47, 1)
-    key_bytes.insert(55, 1)
-    key_bytes.insert(63, 1)
+    key_bits.insert(7, 1)
+    key_bits.insert(15, 1)
+    key_bits.insert(23, 1)
+    key_bits.insert(31, 1)
+    key_bits.insert(39, 1)
+    key_bits.insert(47, 1)
+    key_bits.insert(55, 1)
+    key_bits.insert(63, 1)
 
     round_keys = list()
     c0 = bitarray(28)
+    c0.setall(False)
     d0 = bitarray(28)
+    d0.setall(False)
 
     for ind in range(1, 28 + 1):
-        c0[ind - 1] = extend_key_permutation_c[ind]
-        d0[ind - 1] = extend_key_permutation_d[ind]
+        c0[ind - 1] = key_bits[extend_key_permutation_c[ind]]
+        d0[ind - 1] = key_bits[extend_key_permutation_d[ind]]
 
     for shift_ind in range(1, 16 + 1):
-        ci = c0 << cyclic_shift[shift_ind]
-        di = d0 << cyclic_shift[shift_ind]
-        round_keys.append(ci.append(di))
+        ci = shift_left(c0, cyclic_shift[shift_ind])
+        di = shift_left(d0, cyclic_shift[shift_ind])
+        ci.append(di)
+        round_keys.append(ci)
         print(round_keys[shift_ind - 1])
 
     return round_keys
@@ -57,9 +60,6 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
             data_bits[initial_permutation[ind] - 1], data_bits[ind - 1]
 
     print(data_bits)
-    # print(data_bits.tostring())
-
-    # raise NotImplementedError()
 
 
 def decrypt(code_bytes: bytearray, key_bytes: bytearray) -> bytearray:
