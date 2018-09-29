@@ -1,5 +1,5 @@
 def encrypt(data_bytes: bytearray, key_bytes: bytearray) -> bytearray:
-
+    
     raise NotImplementedError()
 
 
