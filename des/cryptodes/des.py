@@ -59,6 +59,8 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
         data_bits[ind - 1], data_bits[initial_permutation[ind] - 1] = \
             data_bits[initial_permutation[ind] - 1], data_bits[ind - 1]
 
+
+
     print(data_bits)
 
 
