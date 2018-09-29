@@ -2,6 +2,7 @@ from tables import initial_permutation
 from tables import extend_key_permutation_c
 from tables import extend_key_permutation_d
 from tables import cyclic_shift
+from tables import key_bits_positions
 from bitarray import bitarray
 
 
@@ -42,8 +43,11 @@ def create_keys(key_bits: bitarray) -> list:
     for shift_ind in range(1, 16 + 1):
         ci = shift_left(c0, cyclic_shift[shift_ind])
         di = shift_left(d0, cyclic_shift[shift_ind])
-        ci.append(di)
-        round_keys.append(ci)
+        ci.extend(di)
+        ki = bitarray(48)
+        for ind in range(1, 48 + 1):
+            ki[ind - 1] = ci[key_bits_positions[ind] - 1]
+        round_keys.append(ki)
         print(round_keys[shift_ind - 1])
 
     return round_keys

@@ -146,7 +146,7 @@ cyclic_shift = {
     16: 1
 }
 
-key_bits = {
+key_bits_positions = {
     1: 14,
     2: 17,
     3: 11,
