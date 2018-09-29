@@ -1,13 +1,31 @@
 from tables import initial_permutation
+from tables import extend_key_permutation_c
+from tables import extend_key_permutation_d
 from bitarray import bitarray
 
 
 def create_keys(key_bytes: bitarray) -> list:
-    key_bytes = key_bytes[:56]
     while len(key_bytes) < 56:
         key_bytes.append(0)
 
+    key_bytes.insert(7, 1)
+    key_bytes.insert(15, 1)
+    key_bytes.insert(23, 1)
+    key_bytes.insert(31, 1)
+    key_bytes.insert(39, 1)
+    key_bytes.insert(47, 1)
+    key_bytes.insert(55, 1)
+    key_bytes.insert(63, 1)
+
     round_keys = list()
+    c0 = bitarray(28)
+    d0 = bitarray(28)
+
+    for ind in range(1, 28 + 1):
+        c0[ind - 1] = extend_key_permutation_c[ind]
+        d0[ind - 1] = extend_key_permutation_d[ind]
+
+
 
     return round_keys
 
