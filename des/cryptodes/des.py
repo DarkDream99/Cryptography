@@ -43,12 +43,16 @@ def create_keys(key_bits: bitarray) -> list:
     for shift_ind in range(1, 16 + 1):
         ci = shift_left(c0, cyclic_shift[shift_ind])
         di = shift_left(d0, cyclic_shift[shift_ind])
+        c0 = ci.copy()
+        d0 = di.copy()
         ci.extend(di)
         ki = bitarray(48)
         for ind in range(1, 48 + 1):
             ki[ind - 1] = ci[key_bits_positions[ind] - 1]
         round_keys.append(ki)
-        print(round_keys[shift_ind - 1])
+        # print(round_keys[shift_ind - 1])
+        # print(round_keys[shift_ind - 1].tobytes())
+        # print(round_keys[shift_ind - 1].tobytes().decode('utf-8', 'replace'))
 
     return round_keys
 
@@ -57,15 +61,16 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     while len(data_bits) < 64:
         data_bits.append(0)
 
-    print(data_bits.tostring())
     print(data_bits)
+    print(data_bits.tobytes().decode('utf-8', 'replace'))
     for ind in range(1, len(data_bits) + 1):
         data_bits[ind - 1], data_bits[initial_permutation[ind] - 1] = \
             data_bits[initial_permutation[ind] - 1], data_bits[ind - 1]
 
-
+    keys = create_keys(key_bits)
 
     print(data_bits)
+    print(data_bits.tobytes().decode('utf-8', 'replace'))
 
 
 def decrypt(code_bytes: bytearray, key_bytes: bytearray) -> bytearray:
@@ -77,13 +82,14 @@ if __name__ == "__main__":
     # bits.fromstring("A")
     # print(bits)
 
-    bitdata = bitarray(endian='big')
+    bitdata = bitarray()
     bitkey = bitarray()
 
     bitdata.fromstring("Hello, Denys")
-    bitkey.fromstring("key")
-    # encrypt(bitdata[:64], bitkey)
-    create_keys(bitkey)
+    bitkey.fromstring("arima san")
+    encrypt(bitdata[:64], bitkey)
+    # create_keys(bitkey)
+    # bitdata.tobytes()
 
     # encrypt(bytearray("Hello Denys. I'm fine", encoding="utf-8"), bytearray("key", encoding="utf-8"))
     # text = "hello "
