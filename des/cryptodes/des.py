@@ -156,6 +156,14 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
             data_bits[initial_permutation[ind]], data_bits[ind - 1]
 
     keys = create_keys(key_bits)
+    part_l = data_bits[:32]
+    part_r = data_bits[32:]
+    for counter in range(16):
+        li = part_r
+        ri = part_l ^ do_func_feistel(part_r, keys[counter])
+        part_l, part_r = li, ri
+
+    one_part = part_l.extend(part_r)
 
     print(data_bits)
     print(data_bits.tobytes().decode('utf-8', 'replace'))
