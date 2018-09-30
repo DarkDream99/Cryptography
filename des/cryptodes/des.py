@@ -40,9 +40,9 @@ def _create_keys(key_bits: bitarray) -> list:
     d0 = bitarray(28)
     d0.setall(False)
 
-    for ind in range(1, 28 + 1):
-        c0[ind - 1] = key_bits[extend_key_permutation_c[ind] - 1]
-        d0[ind - 1] = key_bits[extend_key_permutation_d[ind] - 1]
+    for ind in range(28):
+        c0[ind] = key_bits[extend_key_permutation_c[ind]]
+        d0[ind] = key_bits[extend_key_permutation_d[ind]]
 
     for shift_ind in range(16):
         ci = _shift_left(c0, cyclic_shift[shift_ind])
