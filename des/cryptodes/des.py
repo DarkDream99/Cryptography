@@ -4,6 +4,7 @@ from tables import extend_key_permutation_d
 from tables import cyclic_shift
 from tables import key_bits_positions
 from tables import extension_E
+from tables import transformation_S
 from bitarray import bitarray
 
 
@@ -41,7 +42,7 @@ def create_keys(key_bits: bitarray) -> list:
         c0[ind - 1] = key_bits[extend_key_permutation_c[ind]]
         d0[ind - 1] = key_bits[extend_key_permutation_d[ind]]
 
-    for shift_ind in range(1, 16 + 1):
+    for shift_ind in range(16):
         ci = shift_left(c0, cyclic_shift[shift_ind])
         di = shift_left(d0, cyclic_shift[shift_ind])
         c0 = ci.copy()
@@ -60,10 +61,70 @@ def create_keys(key_bits: bitarray) -> list:
 
 def extension_e(part_r: bitarray) -> bitarray:
     extension_r = bitarray()
-    for ind in range(1, 48 + 1):
+    for ind in range(48):
         extension_r.append(part_r[extension_E[ind]])
 
     return extension_r
+
+
+def _convert_to_string(bits: bitarray) -> str:
+    res = ""
+    for ind in range(len(bits)):
+        if bits[ind]:
+            res += '1'
+        else:
+            res += '0'
+
+    return res
+
+
+def _convert_to_bits(value: int) -> str:
+    res = ""
+    while value != 0:
+        if value % 2 != 0:
+            res = '1' + res
+        else:
+            res = '0' + res
+        value //= 2
+
+    return res.zfill(4)
+
+
+def transform_s(data: bitarray) -> bitarray:
+    def make_index(bits: bitarray) -> int:
+        bin_a = bitarray()
+        bin_a.append(bits[0])
+        bin_a.append(bits[5])
+
+        bin_b = bitarray()
+        bin_b.append(bits[1])
+        bin_b.append(bits[2])
+        bin_b.append(bits[3])
+        bin_b.append(bits[4])
+
+        key_a = int(_convert_to_string(bin_a), 2)
+        key_b = int(_convert_to_string(bin_b), 2)
+
+        index = key_a * 16 + key_b
+        return index
+
+    blocks = []
+    block = bitarray()
+    for ind in range(len(data)):
+        if ind % 6 == 0 and ind != 0:
+            blocks.append(block)
+            block = bitarray()
+        block.append(data[ind])
+    blocks.append(block)
+
+    res = bitarray()
+    for block_id in range(8):
+        index = make_index(blocks[block_id])
+        block = transformation_S[block_id][index]
+        str_bits = _convert_to_bits(block)
+        res.extend(str_bits)
+
+    return res
 
 
 def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
@@ -72,9 +133,9 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
 
     print(data_bits)
     print(data_bits.tobytes().decode('utf-8', 'replace'))
-    for ind in range(1, len(data_bits) + 1):
-        data_bits[ind - 1], data_bits[initial_permutation[ind] - 1] = \
-            data_bits[initial_permutation[ind] - 1], data_bits[ind - 1]
+    for ind in range(1, len(data_bits)):
+        data_bits[ind - 1], data_bits[initial_permutation[ind]] = \
+            data_bits[initial_permutation[ind]], data_bits[ind - 1]
 
     keys = create_keys(key_bits)
 
@@ -96,7 +157,8 @@ if __name__ == "__main__":
 
     bitdata.fromstring("Hello, Denys")
     bitkey.fromstring("arima san")
-    encrypt(bitdata[:64], bitkey)
+    # encrypt(bitdata[:64], bitkey)
+    transform_s(bitdata[:48])
     # create_keys(bitkey)
     # bitdata.tobytes()
 
