@@ -6,6 +6,7 @@ from tables import key_bits_positions
 from tables import extension_E
 from tables import transformation_S
 from tables import permutation_p
+from tables import last_permutation
 from bitarray import bitarray
 
 
@@ -145,6 +146,14 @@ def do_func_feistel(part_r: bitarray, key: bitarray) -> bitarray:
     return extend_part_r
 
 
+def do_last_permutation(data: bitarray) -> bitarray:
+    res = bitarray()
+    for ind in range(64):
+        res.append(data[last_permutation[ind]])
+
+    return res
+
+
 def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     while len(data_bits) < 64:
         data_bits.append(0)
@@ -164,9 +173,12 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
         part_l, part_r = li, ri
 
     one_part = part_l.extend(part_r)
+    res = do_last_permutation(one_part)
 
-    print(data_bits)
-    print(data_bits.tobytes().decode('utf-8', 'replace'))
+    print(res)
+    print(res.tobytes().decode('utf-8', 'replace'))
+
+    return res
 
 
 def decrypt(code_bytes: bytearray, key_bytes: bytearray) -> bytearray:
