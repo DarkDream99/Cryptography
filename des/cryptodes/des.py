@@ -136,6 +136,15 @@ def do_permutation_p(data: bitarray) -> bitarray:
     return res
 
 
+def do_func_feistel(part_r: bitarray, key: bitarray) -> bitarray:
+    extend_part_r = extension_E(part_r)
+    extend_part_r = extend_part_r ^ key
+    extend_part_r = transform_s(extend_part_r)
+    extend_part_r = do_permutation_p(extend_part_r)
+
+    return extend_part_r
+
+
 def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     while len(data_bits) < 64:
         data_bits.append(0)
