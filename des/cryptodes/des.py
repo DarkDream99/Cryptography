@@ -10,7 +10,7 @@ from tables import last_permutation
 from bitarray import bitarray
 
 
-def shift_left(data: bitarray, size) -> bitarray:
+def _shift_left(data: bitarray, size) -> bitarray:
     res = bitarray(len(data))
     for ind in range(0, len(data) - size):
         res[ind] = data[ind + size]
@@ -21,7 +21,7 @@ def shift_left(data: bitarray, size) -> bitarray:
     return res
 
 
-def create_keys(key_bits: bitarray) -> list:
+def _create_keys(key_bits: bitarray) -> list:
     while len(key_bits) < 56:
         key_bits.append(0)
 
@@ -41,12 +41,12 @@ def create_keys(key_bits: bitarray) -> list:
     d0.setall(False)
 
     for ind in range(1, 28 + 1):
-        c0[ind - 1] = key_bits[extend_key_permutation_c[ind]]
-        d0[ind - 1] = key_bits[extend_key_permutation_d[ind]]
+        c0[ind - 1] = key_bits[extend_key_permutation_c[ind] - 1]
+        d0[ind - 1] = key_bits[extend_key_permutation_d[ind] - 1]
 
     for shift_ind in range(16):
-        ci = shift_left(c0, cyclic_shift[shift_ind])
-        di = shift_left(d0, cyclic_shift[shift_ind])
+        ci = _shift_left(c0, cyclic_shift[shift_ind])
+        di = _shift_left(d0, cyclic_shift[shift_ind])
         c0 = ci.copy()
         d0 = di.copy()
         ci.extend(di)
@@ -61,7 +61,7 @@ def create_keys(key_bits: bitarray) -> list:
     return round_keys
 
 
-def extension_e(part_r: bitarray) -> bitarray:
+def _extension_e(part_r: bitarray) -> bitarray:
     extension_r = bitarray()
     for ind in range(48):
         extension_r.append(part_r[extension_E[ind]])
@@ -92,7 +92,7 @@ def _convert_to_bits(value: int) -> str:
     return res.zfill(4)
 
 
-def transform_s(data: bitarray) -> bitarray:
+def _transform_s(data: bitarray) -> bitarray:
     def make_index(bits: bitarray) -> int:
         bin_a = bitarray()
         bin_a.append(bits[0])
@@ -129,7 +129,7 @@ def transform_s(data: bitarray) -> bitarray:
     return res
 
 
-def do_permutation_p(data: bitarray) -> bitarray:
+def _do_permutation_p(data: bitarray) -> bitarray:
     res = bitarray()
     for index in range(32):
         res.append(data[permutation_p[index]])
@@ -137,16 +137,16 @@ def do_permutation_p(data: bitarray) -> bitarray:
     return res
 
 
-def do_func_feistel(part_r: bitarray, key: bitarray) -> bitarray:
-    extend_part_r = extension_e(part_r)
+def _do_func_feistel(part_r: bitarray, key: bitarray) -> bitarray:
+    extend_part_r = _extension_e(part_r)
     extend_part_r = extend_part_r ^ key
-    extend_part_r = transform_s(extend_part_r)
-    extend_part_r = do_permutation_p(extend_part_r)
+    extend_part_r = _transform_s(extend_part_r)
+    extend_part_r = _do_permutation_p(extend_part_r)
 
     return extend_part_r
 
 
-def do_last_permutation(data: bitarray) -> bitarray:
+def _do_last_permutation(data: bitarray) -> bitarray:
     res = bitarray()
     for ind in range(64):
         res.append(data[last_permutation[ind]])
@@ -164,17 +164,17 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     for ind in range(0, len(data_bits)):
         permutation_data.append(data_bits[initial_permutation[ind]])
 
-    keys = create_keys(key_bits)
+    keys = _create_keys(key_bits)
     part_l = permutation_data[:32]
     part_r = permutation_data[32:]
     for counter in range(16):
         li = part_r
-        ri = part_l ^ do_func_feistel(part_r, keys[counter])
+        ri = part_l ^ _do_func_feistel(part_r, keys[counter])
         part_l, part_r = li, ri
 
     one_part = part_l
     one_part.extend(part_r)
-    res = do_last_permutation(one_part)
+    res = _do_last_permutation(one_part)
 
     print(res)
     print(res.tobytes().decode('utf-8', 'replace'))
@@ -187,17 +187,17 @@ def decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     for ind in range(0, len(code_bits)):
         permutation_code.append(code_bits[initial_permutation[ind]])
 
-    keys = create_keys(key_bits)
-    part_l = code_bits[:32]
-    part_r = code_bits[32:]
+    keys = _create_keys(key_bits)
+    part_l = permutation_code[:32]
+    part_r = permutation_code[32:]
     for counter in range(15, 0 - 1, -1):
         ri = part_l
-        li = part_r ^ do_func_feistel(part_l, keys[counter])
+        li = part_r ^ _do_func_feistel(part_l, keys[counter])
         part_l, part_r = li, ri
 
     one_part = part_l
     one_part.extend(part_r)
-    res = do_last_permutation(one_part)
+    res = _do_last_permutation(one_part)
 
     print(res)
     print(res.tobytes().decode('utf-8', 'replace'))
@@ -215,8 +215,8 @@ if __name__ == "__main__":
 
     bitdata.fromstring("Hello, Denys")
     bitkey.fromstring("arima san")
-    code = encrypt(bitdata[:64], bitkey)
-    decode = decrypt(code, bitkey)
+    code = encrypt(bitdata[:64], bitkey[:56])
+    decode = decrypt(code, bitkey[:56])
     # transform_s(bitdata[:48])
     # create_keys(bitkey)
     # bitdata.tobytes()
