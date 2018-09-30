@@ -10,6 +10,10 @@ from tables import last_permutation
 from bitarray import bitarray
 
 
+_KEY_SIZE = 56
+_BLOCK_SIZE = 64
+
+
 def _shift_left(data: bitarray, size) -> bitarray:
     res = bitarray(len(data))
     for ind in range(0, len(data) - size):
@@ -155,8 +159,8 @@ def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     while len(data_bits) < 64:
         data_bits.append(0)
 
-    print(data_bits)
-    print(data_bits.tobytes().decode('utf-8', 'replace'))
+    # print(data_bits)
+    # print(data_bits.tobytes().decode('utf-8', 'replace'))
     permutation_data = bitarray()
     for ind in range(0, len(data_bits)):
         permutation_data.append(data_bits[initial_permutation[ind]])
@@ -173,8 +177,8 @@ def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     one_part.extend(part_r)
     res = _do_last_permutation(one_part)
 
-    print(res)
-    print(res.tobytes().decode('utf-8', 'replace'))
+    # print(res)
+    # print(res.tobytes().decode('utf-8', 'replace'))
 
     return res
 
@@ -202,15 +206,36 @@ def _decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     return res
 
 
-def encrypt(text: str, key: str) -> tuple:
-    pass
+def encrypt(text: str, key: str) -> bitarray:
+    bit_text = bitarray()
+    bit_key = bitarray()
+
+    bit_text.fromstring(text)
+    bit_key.fromstring(key)
+
+    bit_key = bit_key[:_KEY_SIZE]
+    code = bitarray()
+    block = bitarray()
+
+    for ind in range(len(bit_text)):
+        if ind != 0 and ind % _BLOCK_SIZE == 0:
+            code_block = _encrypt(block, bit_key)
+            code.extend(code_block)
+            block.fromstring('')
+        block.append(bit_text[ind])
+
+    return code
 
 
 if __name__ == "__main__":
     bitdata = bitarray()
     bitkey = bitarray()
 
-    bitdata.fromstring("Hello, Denys")
-    bitkey.fromstring("arima san")
-    code = _encrypt(bitdata[:64], bitkey[:56])
-    decode = _decrypt(code, bitkey[:56])
+    # bitdata.fromstring("Hello, Denys")
+    # bitkey.fromstring("arima san")
+    text = "Hello, Denys"
+    key = "arima san"
+    code = encrypt(text, key)
+    print(code)
+    print(code.tobytes().decode("utf-8", 'replace'))
+    # decode = _decrypt(code, bitkey[:56])
