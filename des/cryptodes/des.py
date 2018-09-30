@@ -5,6 +5,7 @@ from tables import cyclic_shift
 from tables import key_bits_positions
 from tables import extension_E
 from tables import transformation_S
+from tables import permutation_p
 from bitarray import bitarray
 
 
@@ -123,6 +124,14 @@ def transform_s(data: bitarray) -> bitarray:
         block = transformation_S[block_id][index]
         str_bits = _convert_to_bits(block)
         res.extend(str_bits)
+
+    return res
+
+
+def do_permutation_p(data: bitarray) -> bitarray:
+    res = bitarray()
+    for index in range(32):
+        res.append(data[permutation_p[index]])
 
     return res
 
