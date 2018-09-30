@@ -55,8 +55,8 @@ def _create_keys(key_bits: bitarray) -> list:
         d0 = di.copy()
         ci.extend(di)
         ki = bitarray(48)
-        for ind in range(1, 48 + 1):
-            ki[ind - 1] = ci[key_bits_positions[ind] - 1]
+        for ind in range(0, 48):
+            ki[ind] = ci[key_bits_positions[ind]]
         round_keys.append(ki)
 
     return round_keys
