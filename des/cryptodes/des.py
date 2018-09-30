@@ -3,6 +3,7 @@ from tables import extend_key_permutation_c
 from tables import extend_key_permutation_d
 from tables import cyclic_shift
 from tables import key_bits_positions
+from tables import extension_E
 from bitarray import bitarray
 
 
@@ -55,6 +56,14 @@ def create_keys(key_bits: bitarray) -> list:
         # print(round_keys[shift_ind - 1].tobytes().decode('utf-8', 'replace'))
 
     return round_keys
+
+
+def extension_e(part_r: bitarray) -> bitarray:
+    extension_r = bitarray()
+    for ind in range(1, 48 + 1):
+        extension_r.append(part_r[extension_E[ind]])
+
+    return extension_r
 
 
 def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
