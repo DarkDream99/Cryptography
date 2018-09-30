@@ -54,9 +54,6 @@ def _create_keys(key_bits: bitarray) -> list:
         for ind in range(1, 48 + 1):
             ki[ind - 1] = ci[key_bits_positions[ind] - 1]
         round_keys.append(ki)
-        # print(round_keys[shift_ind - 1])
-        # print(round_keys[shift_ind - 1].tobytes())
-        # print(round_keys[shift_ind - 1].tobytes().decode('utf-8', 'replace'))
 
     return round_keys
 
@@ -154,7 +151,7 @@ def _do_last_permutation(data: bitarray) -> bitarray:
     return res
 
 
-def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
+def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     while len(data_bits) < 64:
         data_bits.append(0)
 
@@ -182,7 +179,7 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     return res
 
 
-def decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
+def _decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     permutation_code = bitarray()
     for ind in range(0, len(code_bits)):
         permutation_code.append(code_bits[initial_permutation[ind]])
@@ -205,24 +202,15 @@ def decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     return res
 
 
-if __name__ == "__main__":
-    # bits = bitarray(endian="little")
-    # bits.fromstring("A")
-    # print(bits)
+def encrypt(text: str, key: str) -> tuple:
+    pass
 
+
+if __name__ == "__main__":
     bitdata = bitarray()
     bitkey = bitarray()
 
     bitdata.fromstring("Hello, Denys")
     bitkey.fromstring("arima san")
-    code = encrypt(bitdata[:64], bitkey[:56])
-    decode = decrypt(code, bitkey[:56])
-    # transform_s(bitdata[:48])
-    # create_keys(bitkey)
-    # bitdata.tobytes()
-
-    # encrypt(bytearray("Hello Denys. I'm fine", encoding="utf-8"), bytearray("key", encoding="utf-8"))
-    # text = "hello "
-    #
-    # bits = bytearray(text, encoding="utf-8")
-    # print(bits)
+    code = _encrypt(bitdata[:64], bitkey[:56])
+    decode = _decrypt(code, bitkey[:56])
