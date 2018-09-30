@@ -200,8 +200,8 @@ def _decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     one_part.extend(part_r)
     res = _do_last_permutation(one_part)
 
-    print(res)
-    print(res.tobytes().decode('utf-8', 'replace'))
+    # print(res)
+    # print(res.tobytes().decode('utf-8', 'replace'))
 
     return res
 
@@ -221,10 +221,34 @@ def encrypt(text: str, key: str) -> bitarray:
         if ind != 0 and ind % _BLOCK_SIZE == 0:
             code_block = _encrypt(block, bit_key)
             code.extend(code_block)
-            block.fromstring('')
+            block = bitarray(0)
         block.append(bit_text[ind])
 
+    code_block = _encrypt(block, bit_key)
+    code.extend(code_block)
+
     return code
+
+
+def decrypt(code: bitarray, key: str) -> bitarray:
+    bit_key = bitarray()
+    bit_key.fromstring(key)
+
+    bit_key = bit_key[:_KEY_SIZE]
+    decode = bitarray()
+    block = bitarray()
+
+    for ind in range(len(code)):
+        if ind != 0 and ind % _BLOCK_SIZE == 0:
+            decode_block = _decrypt(block, bit_key)
+            decode.extend(decode_block)
+            block = bitarray(0)
+        block.append(code[ind])
+
+    decode_block = _decrypt(block, bit_key)
+    decode.extend(decode_block)
+
+    return decode
 
 
 if __name__ == "__main__":
@@ -233,9 +257,12 @@ if __name__ == "__main__":
 
     # bitdata.fromstring("Hello, Denys")
     # bitkey.fromstring("arima san")
-    text = "Hello, Denys"
+    text = "Hello, Denys. You are the best!!!"
     key = "arima san"
     code = encrypt(text, key)
     print(code)
     print(code.tobytes().decode("utf-8", 'replace'))
-    # decode = _decrypt(code, bitkey[:56])
+
+    decode = decrypt(code, key)
+    print(decode)
+    print(decode.tobytes().decode("utf-8", "replace"))
