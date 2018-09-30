@@ -138,7 +138,7 @@ def do_permutation_p(data: bitarray) -> bitarray:
 
 
 def do_func_feistel(part_r: bitarray, key: bitarray) -> bitarray:
-    extend_part_r = extension_E(part_r)
+    extend_part_r = extension_e(part_r)
     extend_part_r = extend_part_r ^ key
     extend_part_r = transform_s(extend_part_r)
     extend_part_r = do_permutation_p(extend_part_r)
@@ -160,19 +160,20 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
 
     print(data_bits)
     print(data_bits.tobytes().decode('utf-8', 'replace'))
-    for ind in range(1, len(data_bits)):
-        data_bits[ind - 1], data_bits[initial_permutation[ind]] = \
-            data_bits[initial_permutation[ind]], data_bits[ind - 1]
+    permutation_data = bitarray()
+    for ind in range(0, len(data_bits)):
+        permutation_data.append(data_bits[initial_permutation[ind]])
 
     keys = create_keys(key_bits)
-    part_l = data_bits[:32]
-    part_r = data_bits[32:]
+    part_l = permutation_data[:32]
+    part_r = permutation_data[32:]
     for counter in range(16):
         li = part_r
         ri = part_l ^ do_func_feistel(part_r, keys[counter])
         part_l, part_r = li, ri
 
-    one_part = part_l.extend(part_r)
+    one_part = part_l
+    one_part.extend(part_r)
     res = do_last_permutation(one_part)
 
     print(res)
@@ -181,8 +182,27 @@ def encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     return res
 
 
-def decrypt(code_bytes: bytearray, key_bytes: bytearray) -> bytearray:
-    raise NotImplementedError()
+def decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
+    permutation_code = bitarray()
+    for ind in range(0, len(code_bits)):
+        permutation_code.append(code_bits[initial_permutation[ind]])
+
+    keys = create_keys(key_bits)
+    part_l = code_bits[:32]
+    part_r = code_bits[32:]
+    for counter in range(15, 0 - 1, -1):
+        ri = part_l
+        li = part_r ^ do_func_feistel(part_l, keys[counter])
+        part_l, part_r = li, ri
+
+    one_part = part_l
+    one_part.extend(part_r)
+    res = do_last_permutation(one_part)
+
+    print(res)
+    print(res.tobytes().decode('utf-8', 'replace'))
+
+    return res
 
 
 if __name__ == "__main__":
@@ -195,8 +215,9 @@ if __name__ == "__main__":
 
     bitdata.fromstring("Hello, Denys")
     bitkey.fromstring("arima san")
-    # encrypt(bitdata[:64], bitkey)
-    transform_s(bitdata[:48])
+    code = encrypt(bitdata[:64], bitkey)
+    decode = decrypt(code, bitkey)
+    # transform_s(bitdata[:48])
     # create_keys(bitkey)
     # bitdata.tobytes()
 
