@@ -251,7 +251,7 @@ def decrypt(code: bitarray, key: str) -> bitarray:
     return decode
 
 
-if __name__ == "__main__":
+def _test():
     bitdata = bitarray()
     bitkey = bitarray()
 
@@ -266,3 +266,7 @@ if __name__ == "__main__":
     decode = decrypt(code, key)
     print(decode)
     print(decode.tobytes().decode("utf-8", "replace"))
+
+
+if __name__ == "__main__":
+    _test()
