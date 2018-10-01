@@ -21,15 +21,15 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-4">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 {% block source %}{% endblock source %}
             </div>
         </div>
 
-        <div class="col-sm-2"></div>
-        <div class="col-sm-4">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 {% block convert_source %}{% endblock convert_source %}
             </div>
@@ -37,16 +37,16 @@
     </div>
 
     <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-4">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="key">{% block label_key %}{% endblock label_key %}</label>
                 <textarea id="key" rows="4" cols="50" maxlength="7" class="form-control">{% block key_text %}{% endblock key_text %}</textarea>
             </div>
         </div>
 
-        <div class="col-lg-2"></div>
-        <div class="col-sm-4">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="key_in_bits">{% block label_key_in_bits %}{% endblock label_key_in_bits %}</label>
                 <textarea id="key_in_bits" rows="4" cols="50" readonly class="form-control">{% block key_text_in_bits %}{% endblock key_text_in_bits %}</textarea>
@@ -73,16 +73,16 @@
     <hr>
 
     <div class="row">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-4">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="res_text">{% block label_result %}{% endblock label_result %}</label>
                 <textarea id="res_text" rows="4" cols="50" readonly class="form-control">{% block result_text %}{% endblock result_text %}</textarea>
             </div>
         </div>
 
-        <div class="col-sm-2"></div>
-        <div class="col-sm-4">
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="res_in_bits">{% block label_result_in_bits %}{% endblock label_result_in_bits %}</label>
                 <textarea id="res_in_bits" rows="4" cols="50" readonly class="form-control">{% block result_text_in_bits %}{% endblock result_text_in_bits %}</textarea>
