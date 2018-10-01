@@ -1,4 +1,9 @@
 {% extends "desapp/base_des.html" %}
+{% load staticfiles %}
+
+{% block scripts %}
+    <script src="{% static 'scripts/decrypt.js' %}"></script>
+{% endblock scripts %}
 
 {% block title %}Decrypt{% endblock title %}
 {% block header %}Decrypt page{% endblock header %}

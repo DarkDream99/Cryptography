@@ -1,11 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load staticfiles %}
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/des.css' %}">
     <title>DES</title>
 </head>
 <body>
-    <h1>Implementation of DES algorithm</h1>
-    <a href="encrypt.html"><button type="button" >encrypt</button></a>
-    <button type="button" href="#.html">decrypt</button>
+    <h1 class="header">Implementation of DES algorithm</h1>
+    <div class="container-fluid">
+        <div class="row" style="height: 30vh"></div>
+        <div class="row"style="height: 10vh">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <a href="encrypt.html" class="btn btn-outline-success" style="width: 100%; height: 100%">
+                    ENCRYPT
+                </a>
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+        <div class="row" style="height: 10vh"></div>
+        <div class="row"style="height: 10vh">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <a href="decrypt.html" class="btn btn-outline-success" style="width: 100%; height: 100%;">
+                    DECRYPT
+                </a>
+            </div>
+            <div class="col-sm-4"></div>
+        </div>
+        <div class="row" style="height: 40vh"></div>
+    </div>
+    <!--<a href="encrypt.html"><button type="button" >encrypt</button></a>-->
+    <!--<button type="button" href="#.html">decrypt</button>-->
 </body>

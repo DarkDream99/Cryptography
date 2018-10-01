@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     re_path('encrypt(\.html)?/bits/', views.convert_to_bits),
     re_path('encrypt(\.html)?/', views.encrypt),
-    re_path('decrypt(\.html)?/text/'),
-    re_path('decrypt(.html)?/', views.decrypt),
+    re_path('decrypt(\.html)?/text/', views.convert_to_text),
+    re_path('decrypt(\.html)?/', views.decrypt),
     path('', views.index, name='DES'),
 ]

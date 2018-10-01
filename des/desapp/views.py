@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.template import loader
 from cryptodes.des import encrypt as des_encrypt
-from ..cryptodes.des import decrypt as des_decrypt
+from cryptodes.des import decrypt as des_decrypt
 from cryptodes.des import _convert_to_string
 from bitarray import bitarray
 
@@ -50,4 +50,10 @@ def decrypt(request, *args):
         return render(request, 'desapp/decrypt.html', context)
 
 
+def convert_to_text(request, *args):
+    bits = request.GET['bits']
+    bits_code = bitarray()
+    for bit in bits:
+        bits_code.append(1 if bit == '1' else 0)
 
+    return HttpResponse(bits_code.tobytes().decode("utf-8", "replace"))
