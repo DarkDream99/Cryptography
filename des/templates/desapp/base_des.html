@@ -23,16 +23,14 @@
         <div class="col-sm-1"></div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="source">{% block label_source %}{% endblock label_source %}</label>
-                <textarea id="source" rows="4" cols="50" class="form-control">{% block source_text %}{% endblock source_text %}</textarea>
+                {% block source %}{% endblock source %}
             </div>
         </div>
 
         <div class="col-sm-2"></div>
         <div class="col-sm-4">
             <div class="form-group">
-                <label for="source_in_bits">{% block label_source_in_bits %}{% endblock label_source_in_bits %}</label>
-                <textarea id="source_in_bits" rows="4" cols="50" readonly class="form-control">{% block source_text_in_bits %}{% endblock source_text_in_bits %}</textarea>
+                {% block convert_source %}{% endblock convert_source %}
             </div>
         </div>
     </div>

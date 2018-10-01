@@ -6,11 +6,15 @@
 
 <div>{{ args }}</div>
 
-{% block label_source %}Source text{% endblock label_source %}
-{% block source_text %}Text{% endblock source_text %}
+{% block source %}
+    <label for="source">Source text</label>
+    <textarea id="source" rows="4" cols="50" class="form-control">Text</textarea>
+{% endblock source %}
 
-{% block label_source_in_bits %}Text in bits{% endblock label_source_in_bits %}
-{% block source_text_in_bits %}01010100011001010111100001110100{% endblock source_text_in_bits %}
+{% block convert_source %}
+    <label for="source_in_bits">Text in bits</label>
+    <textarea id="source_in_bits" rows="4" cols="50" readonly class="form-control">01010100011001010111100001110100</textarea>
+{% endblock convert_source %}
 
 {% block label_key %}Key{% endblock label_key %}
 {% block key_text %}Key{% endblock key_text %}
