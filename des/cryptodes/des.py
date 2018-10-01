@@ -270,3 +270,6 @@ def _test():
 
 if __name__ == "__main__":
     _test()
+    bits = bitarray()
+    bits.fromstring("Key")
+    print(bits)

@@ -4,7 +4,12 @@ from django.template import loader
 
 
 def index(request):
-    template = loader.get_template('desapp/index.html')
     context = {}
-    # return HttpResponse(template.render(context, request))
     return render(request, 'desapp/index.html', context)
+
+
+def encrypt(request, *argv):
+    context = {
+        'args': argv
+    }
+    return render(request, 'desapp/encrypt.html', context)
