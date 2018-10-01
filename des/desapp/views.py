@@ -11,7 +11,7 @@ def index(request):
     return render(request, 'desapp/index.html', context)
 
 
-def encrypt(request, *argv):
+def encrypt(request, *args):
     try:
         text = request.GET['text']
         key = request.GET['key']
@@ -20,6 +20,13 @@ def encrypt(request, *argv):
         return JsonResponse([bits.tobytes().decode('utf-8', 'replace'), _convert_to_string(bits)], safe=False)
     except:
         context = {
-            'args': argv
+            'args': args
         }
         return render(request, 'desapp/encrypt.html', context)
+
+
+def convert_to_bits(request, *args):
+    text = request.GET['text']
+    res_bits = bitarray()
+    res_bits.fromstring(text)
+    return HttpResponse(_convert_to_string(res_bits))

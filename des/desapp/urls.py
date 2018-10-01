@@ -3,7 +3,7 @@ from . import views
 
 
 urlpatterns = [
-    re_path('encrypt(\\.html)?/<text>/<key>', views.encrypt),
+    re_path('encrypt(\\.html)?/bits/', views.convert_to_bits),
     re_path('encrypt(\\.html)?/', views.encrypt),
     path('', views.index, name='DES'),
 ]
