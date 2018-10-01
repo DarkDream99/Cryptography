@@ -25,11 +25,32 @@ def _shift_left(data: bitarray, size) -> bitarray:
     return res
 
 
+def is_low_key(key: str) -> bool:
+    bit_key = bitarray()
+    bit_key.fromstring(key)
+    bit_key = bit_key[:56]
+    while len(bit_key) < 56:
+        bit_key.append(0)
+
+    part_l = bit_key[:28]
+    part_r = bit_key[28:]
+    zeros_l = 0
+    zeros_r = 0
+
+    for ind in range(len(part_l)):
+        if not part_l[ind]:
+            zeros_l += 1
+        if not part_r[ind]:
+            zeros_r += 1
+
+    return zeros_l == 28 or zeros_r == 28
+
+
 def _create_keys(key_bits: bitarray) -> list:
     while len(key_bits) < 56:
         key_bits.append(0)
 
-    key_bits.insert(7, 1)
+    key_bits.insert(7,  1)
     key_bits.insert(15, 1)
     key_bits.insert(23, 1)
     key_bits.insert(31, 1)
