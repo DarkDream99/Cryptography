@@ -30,3 +30,8 @@ def convert_to_bits(request, *args):
     res_bits = bitarray()
     res_bits.fromstring(text)
     return HttpResponse(_convert_to_string(res_bits))
+
+
+def decrypt(request, *args):
+    context = {}
+    return render(request, 'desapp/decrypt.html', context)

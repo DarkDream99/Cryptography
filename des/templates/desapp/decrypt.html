@@ -1,0 +1,26 @@
+{% extends "desapp/base_des.html" %}
+
+{% block title %}Decrypt{% endblock title %}
+{% block header %}Decrypt page{% endblock header %}
+
+{% block source %}
+    <label for="encrypt_bits">Encrypted bits</label>
+    <textarea id="encrypt_bits" rows="4" cols="50" class="form-control"></textarea>
+{% endblock source %}
+
+{% block convert_source %}
+    <label for="encrypt_text">Encrypted text</label>
+    <textarea id="encrypt_text" rows="4" cols="50" readonly class="form-control"></textarea>
+{% endblock convert_source %}
+
+{% block label_key %}Key{% endblock label_key %}
+{% block key_text %}Key{% endblock key_text %}
+
+{% block label_key_in_bits %}Key in bits{% endblock label_key_in_bits %}
+{% block key_text_in_bits %}010010110110010101111001{% endblock key_text_in_bits %}
+
+{% block action %}decrypt{% endblock action %}
+{% block action_name %}Decrypt{% endblock action_name %}
+
+{% block label_result %}Decrypted text{% endblock label_result %}
+{% block label_result_in_bits %}Decrypted text in bits{% endblock label_result_in_bits %}
