@@ -1,12 +1,12 @@
-from tables import initial_permutation
-from tables import extend_key_permutation_c
-from tables import extend_key_permutation_d
-from tables import cyclic_shift
-from tables import key_bits_positions
-from tables import extension_E
-from tables import transformation_S
-from tables import permutation_p
-from tables import last_permutation
+from .tables import initial_permutation
+from .tables import extend_key_permutation_c
+from .tables import extend_key_permutation_d
+from .tables import cyclic_shift
+from .tables import key_bits_positions
+from .tables import extension_E
+from .tables import transformation_S
+from .tables import permutation_p
+from .tables import last_permutation
 from bitarray import bitarray
 
 

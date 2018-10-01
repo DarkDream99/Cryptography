@@ -11,6 +11,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{% static 'scripts/test.js' %}"></script>
+    <script src="{% static 'scripts/encrypt.js' %}"></script>
     <title>{% block title %} Default title {% endblock title %}</title>
 </head>
 <body>
@@ -65,7 +66,7 @@
         <!--<div class="col-sm-1"></div>-->
     <!--</div>-->
 
-    <button type="button" id="des_action" class="btn btn-outline-success btn-block">
+    <button type="button" id="{% block action %} {% endblock action %}" class="btn btn-outline-success btn-block">
         {% block action_name %}{% endblock action_name %}
     </button>
 
