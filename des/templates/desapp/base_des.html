@@ -3,34 +3,94 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %} Default title {% block title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'css/des.css' %}">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'scripts/test.js' %}"></script>
+    <title>{% block title %} Default title {% endblock title %}</title>
 </head>
 <body>
-    <h1>{% block header %}{% block header %}</h1>
-    <div>
-        <label>{% block label_source %}{% block label_source %}</label>
-        <textarea rows="4" cols="50" autofocus>{% block source_text %}{% block source_text %}</textarea>
-
-        <label>{% block label_source_in_bits %}{% block label_source_in_bits %}</label>
-        <textarea rows="4" cols="50" readonly>{% block source_text_in_bits %}{% block source_text_in_bits %}</textarea>
+<div class="container-fluid" style="height: 100%">
+    <div class="header">
+        <h1>{% block header %}{% endblock header %}</h1>
     </div>
 
-    <div>
-        <label>{% block label_key %}{% block label_key %}</label>
-        <textarea rows="4" cols="50">{% block key_text %}{% block key_text %}</textarea>
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="source">{% block label_source %}{% endblock label_source %}</label>
+                <textarea id="source" rows="4" cols="50" class="form-control">{% block source_text %}{% endblock source_text %}</textarea>
+            </div>
+        </div>
 
-        <label>{% block label_key_in_bits %}{% block label_key_in_bits %}</label>
-        <textarea rows="4" cols="50">{% block key_text_in_bits %}{% block key_text_in_bits %}</textarea>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="source_in_bits">{% block label_source_in_bits %}{% endblock label_source_in_bits %}</label>
+                <textarea id="source_in_bits" rows="4" cols="50" readonly class="form-control">{% block source_text_in_bits %}{% endblock source_text_in_bits %}</textarea>
+            </div>
+        </div>
     </div>
 
-    <button type="button">{% block action_name %}{% block action_name %}</button>
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="key">{% block label_key %}{% endblock label_key %}</label>
+                <textarea id="key" rows="4" cols="50" class="form-control">{% block key_text %}{% endblock key_text %}</textarea>
+            </div>
+        </div>
 
-    <div>
-        <label>{% block label_result %}{% block label_result %}</label>
-        <textarea rows="4" cols="50">{% block result_text %}{% block result_text %}</textarea>
-
-        <label>{% block label_result_in_bits %}{% block label_result_in_bits %}</label>
-        <textarea rows="4" cols="50">{% block result_text_in_bits %}{% block result_text_in_bits %}</textarea>
+        <div class="col-lg-2"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="key_in_bits">{% block label_key_in_bits %}{% endblock label_key_in_bits %}</label>
+                <textarea id="key_in_bits" rows="4" cols="50" readonly class="form-control">{% block key_text_in_bits %}{% endblock key_text_in_bits %}</textarea>
+            </div>
+        </div>
     </div>
+
+    <!--<div class="row">-->
+        <!--<div class="col-sm-1"></div>-->
+        <!--<div class="col-sm-4"></div>-->
+        <!--<div class="col-sm-2">-->
+            <!--<button type="button" id="des_action" class="btn btn-outline-success">-->
+                <!--{% block action_name1 %}{% endblock action_name1 %}-->
+            <!--</button>-->
+        <!--</div>-->
+        <!--<div class="col-sm-4"></div>-->
+        <!--<div class="col-sm-1"></div>-->
+    <!--</div>-->
+
+    <button type="button" id="des_action" class="btn btn-outline-success btn-block">
+        {% block action_name %}{% endblock action_name %}
+    </button>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="res_text">{% block label_result %}{% endblock label_result %}</label>
+                <textarea id="res_text" rows="4" cols="50" readonly class="form-control">{% block result_text %}{% endblock result_text %}</textarea>
+            </div>
+        </div>
+
+        <div class="col-sm-2"></div>
+        <div class="col-sm-4">
+            <div class="form-group">
+                <label for="res_in_bits">{% block label_result_in_bits %}{% endblock label_result_in_bits %}</label>
+                <textarea id="res_in_bits" rows="4" cols="50" readonly class="form-control">{% block result_text_in_bits %}{% endblock result_text_in_bits %}</textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

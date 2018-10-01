@@ -1,31 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Encrypt</title>
-</head>
-<body>
-    <h1>Encrypt page</h1>
-    <div>{{ args }}</div>
+{% extends "desapp/base_des.html" %}
+{% load staticfiles %}
 
-    <label>Source text</label>
-    <textarea rows="4" cols="50" autofocus>Text</textarea>
+{% block title %}Encrypt{% endblock title %}
+{% block header %}Encrypt page{% endblock header %}
 
-    <label>Text in bits</label>
-    <textarea rows="4" cols="50" readonly>01010100011001010111100001110100</textarea>
+<div>{{ args }}</div>
 
-    <label>Key</label>
-    <textarea rows="4" cols="50">Key</textarea>
+{% block label_source %}Source text{% endblock label_source %}
+{% block source_text %}Text{% endblock source_text %}
 
-    <lable>Key in bits</lable>
-    <textarea rows="4" cols="50" readonly>010010110110010101111001</textarea>
+{% block label_source_in_bits %}Text in bits{% endblock label_source_in_bits %}
+{% block source_text_in_bits %}01010100011001010111100001110100{% endblock source_text_in_bits %}
 
-    <button type="button">Encrypt</button>
+{% block label_key %}Key{% endblock label_key %}
+{% block key_text %}Key{% endblock key_text %}
 
-    <label>Encrypted text</label>
-    <textarea rows="4" cols="50"></textarea>
+{% block label_key_in_bits %}Key in bits{% endblock label_key_in_bits %}
+{% block key_text_in_bits %}010010110110010101111001{% endblock key_text_in_bits %}
 
-    <label>Encrypted text in bits</label>
-    <textarea rows="4" cols="50" readonly></textarea>
-</body>
-</html>
+{% block action_name %}Encrypt{% endblock action_name %}
+
+{% block label_result %}Encrypted text{% endblock label_result %}
+
+{% block label_result_in_bits %}Encrypted text in bits{% endblock label_result_in_bits %}
