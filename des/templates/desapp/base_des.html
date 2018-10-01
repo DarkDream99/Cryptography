@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %} Default title {% block title %}</title>
+</head>
+<body>
+    <h1>{% block header %}{% block header %}</h1>
+    <div>
+        <label>{% block label_source %}{% block label_source %}</label>
+        <textarea rows="4" cols="50" autofocus>{% block source_text %}{% block source_text %}</textarea>
+
+        <label>{% block label_source_in_bits %}{% block label_source_in_bits %}</label>
+        <textarea rows="4" cols="50" readonly>{% block source_text_in_bits %}{% block source_text_in_bits %}</textarea>
+    </div>
+
+    <div>
+        <label>{% block label_key %}{% block label_key %}</label>
+        <textarea rows="4" cols="50">{% block key_text %}{% block key_text %}</textarea>
+
+        <label>{% block label_key_in_bits %}{% block label_key_in_bits %}</label>
+        <textarea rows="4" cols="50">{% block key_text_in_bits %}{% block key_text_in_bits %}</textarea>
+    </div>
+
+    <button type="button">{% block action_name %}{% block action_name %}</button>
+
+    <div>
+        <label>{% block label_result %}{% block label_result %}</label>
+        <textarea rows="4" cols="50">{% block result_text %}{% block result_text %}</textarea>
+
+        <label>{% block label_result_in_bits %}{% block label_result_in_bits %}</label>
+        <textarea rows="4" cols="50">{% block result_text_in_bits %}{% block result_text_in_bits %}</textarea>
+    </div>
+</body>
+</html>
