@@ -11,7 +11,16 @@ $(document).ready(function() {
             $("#res_text").text(encrypt_text);
             $("#res_in_bits").text(encrypt_text_in_bits);
 
-            $("#entropy").text(entropies);
+            $("#entropy").text("");
+            for (let row in entropies) {
+                for (let val in entropies[row]) {
+                    for (let entr in entropies[row][val])
+                        $("#entropy").append(entropies[row][val][entr] + '  ');
+                    // $("#entropy").html().addBack('<br/>');
+                    $("#entropy").append('<br />');
+                }
+                $("#entropy").append('<br />');
+            }
         }, "text");
     });
 
