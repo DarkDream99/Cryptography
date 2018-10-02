@@ -1,8 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-# from cryptodes.des import encrypt as des_encrypt
-# from cryptodes.des import decrypt as des_decrypt
-# from cryptodes.des import _convert_to_string
 from .libs.cryptodes.des import encrypt as des_encrypt
 from .libs.cryptodes.des import decrypt as des_decrypt
 from .libs.cryptodes.des import convert_to_string
@@ -18,8 +15,10 @@ def encrypt(request, *args):
     try:
         text = request.GET['text']
         key = request.GET['key']
+        request.session['key'] = key
 
         bits, entropies = des_encrypt(text, key)
+        request.session['encrypt_bits'] = convert_to_string(bits)
         return JsonResponse([bits.tobytes().decode('utf-8', 'replace'), convert_to_string(bits), entropies], safe=False)
     except:
         context = {
@@ -49,6 +48,11 @@ def decrypt(request, *args):
                             safe=False)
     except:
         context = {}
+        if 'encrypt_bits' in request.session:
+            context['encrypt_bits'] = request.session['encrypt_bits']
+        if 'key' in request.session:
+            context['key'] = request.session['key']
+
         return render(request, 'desapp/decrypt.html', context)
 
 

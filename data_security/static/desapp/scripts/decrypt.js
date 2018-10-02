@@ -1,4 +1,21 @@
+function init() {
+    let bits = $("#encrypt_bits").val();
+    $.get("text/", {bits: bits}, function(data) {
+       let text =  data;
+       $("#encrypt_text").text(text);
+    }, "text");
+
+    let text = $("#key").val();
+    $.get(HOST + "/des/encrypt/bits/", {text: text}, function(data) {
+       let bits = data;
+       $("#key_in_bits").text(bits);
+    }, "text");
+}
+
+
 $(document).ready(function() {
+    init();
+
     $("#decrypt").click(function() {
         let code_bits = $("#encrypt_bits").val();
         let key = $("#key").val();

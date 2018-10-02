@@ -10,13 +10,15 @@
 
 {% block source %}
     <label for="encrypt_bits">Encrypted bits</label>
-    <textarea id="encrypt_bits" rows="4" cols="50" class="form-control"></textarea>
+    <textarea id="encrypt_bits" rows="4" cols="50" class="form-control">{{encrypt_bits}}</textarea>
 {% endblock source %}
 
 {% block convert_source %}
     <label for="encrypt_text">Encrypted text</label>
     <textarea id="encrypt_text" rows="4" cols="50" readonly class="form-control"></textarea>
 {% endblock convert_source %}
+
+{% block key %}{{key}}{% endblock key %}
 
 {% block action %}decrypt{% endblock action %}
 {% block action_name %}Decrypt{% endblock action_name %}
