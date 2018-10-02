@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block scripts %}
-    <script src="{% static 'scripts/encrypt.js' %}"></script>
+    <script src="{% static 'desapp/scripts/encrypt.js' %}"></script>
 {% endblock scripts %}
 
 {% block title %}Encrypt{% endblock title %}
@@ -19,12 +19,6 @@
     <label for="source_in_bits">Text in bits</label>
     <textarea id="source_in_bits" rows="4" cols="50" readonly class="form-control">01010100011001010111100001110100</textarea>
 {% endblock convert_source %}
-
-{% block label_key %}Key{% endblock label_key %}
-{% block key_text %}Key{% endblock key_text %}
-
-{% block label_key_in_bits %}Key in bits{% endblock label_key_in_bits %}
-{% block key_text_in_bits %}010010110110010101111001{% endblock key_text_in_bits %}
 
 {% block action %}encrypt{% endblock action %}
 {% block action_name %}Encrypt{% endblock action_name %}

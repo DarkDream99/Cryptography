@@ -7,10 +7,10 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/des.css' %}">
+    <link rel="stylesheet" href="{% static 'desapp/css/des.css' %}">
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="{% static 'scripts/setting.js' %}"></script>
+    <script src="{% static 'desapp/scripts/setting.js' %}"></script>
     {% block scripts %}{% endblock scripts %}
     <!--<script src="{% static 'scripts/test.js' %}"></script>-->
     <title>{% block title %} Default title {% endblock title %}</title>
@@ -41,16 +41,16 @@
         <div class="col-md-1"></div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="key">{% block label_key %}{% endblock label_key %}</label>
-                <textarea id="key" rows="4" cols="50" maxlength="7" class="form-control">{% block key_text %}{% endblock key_text %}</textarea>
+                <label for="key">Key</label>
+                <textarea id="key" rows="4" cols="50" maxlength="7" class="form-control">Key</textarea>
             </div>
         </div>
 
         <div class="col-md-2"></div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="key_in_bits">{% block label_key_in_bits %}{% endblock label_key_in_bits %}</label>
-                <textarea id="key_in_bits" rows="4" cols="50" readonly class="form-control">{% block key_text_in_bits %}{% endblock key_text_in_bits %}</textarea>
+                <label for="key_in_bits">Key in bits</label>
+                <textarea id="key_in_bits" rows="4" cols="50" readonly class="form-control">010010110110010101111001</textarea>
             </div>
         </div>
     </div>
