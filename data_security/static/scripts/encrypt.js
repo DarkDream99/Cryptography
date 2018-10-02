@@ -6,9 +6,12 @@ $(document).ready(function() {
             let data = JSON.parse(json_data);
             let encrypt_text = data[0];
             let encrypt_text_in_bits = data[1];
+            let entropies = data[2];
 
             $("#res_text").text(encrypt_text);
             $("#res_in_bits").text(encrypt_text_in_bits);
+
+            $("#entropy").text(entropies);
         }, "text");
     });
 

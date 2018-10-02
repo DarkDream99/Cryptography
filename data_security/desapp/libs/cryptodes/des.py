@@ -1,12 +1,12 @@
-from .tables import initial_permutation
-from .tables import extend_key_permutation_c
-from .tables import extend_key_permutation_d
-from .tables import cyclic_shift
-from .tables import key_bits_positions
-from .tables import extension_E
-from .tables import transformation_S
-from .tables import permutation_p
-from .tables import last_permutation
+from tables import initial_permutation
+from tables import extend_key_permutation_c
+from tables import extend_key_permutation_d
+from tables import cyclic_shift
+from tables import key_bits_positions
+from tables import extension_E
+from tables import transformation_S
+from tables import permutation_p
+from tables import last_permutation
 from bitarray import bitarray
 
 
@@ -265,7 +265,7 @@ def encrypt(text: str, key: str) -> tuple:
             block = bitarray(0)
         block.append(bit_text[ind])
 
-    code_block = _encrypt(block, bit_key)
+    code_block, entropy = _encrypt(block, bit_key)
     code.extend(code_block)
 
     return code, entropies
