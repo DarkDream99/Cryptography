@@ -46,6 +46,17 @@ def is_low_key(key: str) -> bool:
     return zeros_l == 28 or zeros_r == 28
 
 
+def find_entropy(bit_block: bitarray) -> float:
+    count_bits = len(bit_block)
+    count_ones = 0
+
+    for bit in bit_block:
+        if bit:
+            count_ones += 1
+
+    return count_ones / count_bits
+
+
 def _create_keys(key_bits: bitarray) -> list:
     while len(key_bits) < 56:
         key_bits.append(0)
