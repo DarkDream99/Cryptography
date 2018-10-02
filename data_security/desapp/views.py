@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.template import loader
-from cryptodes.des import encrypt as des_encrypt
-from cryptodes.des import decrypt as des_decrypt
-from cryptodes.des import _convert_to_string
+# from cryptodes.des import encrypt as des_encrypt
+# from cryptodes.des import decrypt as des_decrypt
+# from cryptodes.des import _convert_to_string
+from .libs.cryptodes.des import encrypt as des_encrypt
+from .libs.cryptodes.des import decrypt as des_decrypt
+from .libs.cryptodes.des import convert_to_string
 from bitarray import bitarray
 
 
@@ -18,7 +20,7 @@ def encrypt(request, *args):
         key = request.GET['key']
 
         bits = des_encrypt(text, key)
-        return JsonResponse([bits.tobytes().decode('utf-8', 'replace'), _convert_to_string(bits)], safe=False)
+        return JsonResponse([bits.tobytes().decode('utf-8', 'replace'), convert_to_string(bits)], safe=False)
     except:
         context = {
             'args': args
@@ -30,7 +32,7 @@ def convert_to_bits(request, *args):
     text = request.GET['text']
     res_bits = bitarray()
     res_bits.fromstring(text)
-    return HttpResponse(_convert_to_string(res_bits))
+    return HttpResponse(convert_to_string(res_bits))
 
 
 def decrypt(request, *args):
@@ -43,7 +45,7 @@ def decrypt(request, *args):
             bits_code.append(1 if bit == '1' else 0)
 
         bits_decode = des_decrypt(bits_code, key)
-        return JsonResponse([bits_decode.tobytes().decode('utf-8', 'replace'), _convert_to_string(bits_decode)],
+        return JsonResponse([bits_decode.tobytes().decode('utf-8', 'replace'), convert_to_string(bits_decode)],
                             safe=False)
     except:
         context = {}

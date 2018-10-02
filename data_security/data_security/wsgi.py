@@ -1,5 +1,5 @@
 """
-WSGI config for des project.
+WSGI config for data_security project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'des.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'data_security.settings')
 
 application = get_wsgi_application()
