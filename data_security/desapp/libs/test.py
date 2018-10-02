@@ -6,7 +6,7 @@ def test_des():
     bitdata = bitarray()
     bitkey = bitarray()
 
-    text = "Hello, Denys. You are the best!!!"
+    text = "Hello, World. Python is the best!!!"
     key = "arima san"
     code, entropies = des.encrypt(text, key)
     print(code)
