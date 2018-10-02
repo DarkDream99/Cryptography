@@ -19,7 +19,7 @@ def encrypt(request, *args):
         text = request.GET['text']
         key = request.GET['key']
 
-        bits = des_encrypt(text, key)
+        bits, entropies = des_encrypt(text, key)
         return JsonResponse([bits.tobytes().decode('utf-8', 'replace'), convert_to_string(bits)], safe=False)
     except:
         context = {

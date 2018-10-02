@@ -46,11 +46,15 @@ def is_low_key(key: str) -> bool:
     return zeros_l == 28 or zeros_r == 28
 
 
-def find_entropy(bit_block: bitarray) -> float:
-    count_bits = len(bit_block)
+def _find_entropy(bit_block_l: bitarray, bit_block_r: bitarray) -> float:
+    count_bits = len(bit_block_l) + len(bit_block_r)
     count_ones = 0
 
-    for bit in bit_block:
+    for bit in bit_block_l:
+        if bit:
+            count_ones += 1
+
+    for bit in bit_block_r:
         if bit:
             count_ones += 1
 
@@ -187,7 +191,7 @@ def _do_last_permutation(data: bitarray) -> bitarray:
     return res
 
 
-def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
+def _encrypt(data_bits: bitarray, key_bits: bitarray) -> tuple:
     while len(data_bits) < 64:
         data_bits.append(0)
 
@@ -197,13 +201,16 @@ def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     for ind in range(0, len(data_bits)):
         permutation_data.append(data_bits[initial_permutation[ind]])
 
+    entropies = list()
     keys = _create_keys(key_bits)
     part_l = permutation_data[:32]
     part_r = permutation_data[32:]
+    entropies.append(_find_entropy(part_l, part_r))
     for counter in range(16):
         li = part_r
         ri = part_l ^ _do_func_feistel(part_r, keys[counter])
         part_l, part_r = li, ri
+        entropies.append(_find_entropy(part_l, part_r))
 
     one_part = part_l
     one_part.extend(part_r)
@@ -212,7 +219,7 @@ def _encrypt(data_bits: bitarray, key_bits: bitarray) -> bitarray:
     # print(res)
     # print(res.tobytes().decode('utf-8', 'replace'))
 
-    return res
+    return res, entropies
 
 
 def _decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
@@ -238,7 +245,7 @@ def _decrypt(code_bits: bitarray, key_bits: bitarray) -> bitarray:
     return res
 
 
-def encrypt(text: str, key: str) -> bitarray:
+def encrypt(text: str, key: str) -> tuple:
     bit_text = bitarray()
     bit_key = bitarray()
 
@@ -249,9 +256,11 @@ def encrypt(text: str, key: str) -> bitarray:
     code = bitarray()
     block = bitarray()
 
+    entropies = list()
     for ind in range(len(bit_text)):
         if ind != 0 and ind % _BLOCK_SIZE == 0:
-            code_block = _encrypt(block, bit_key)
+            code_block, entropy = _encrypt(block, bit_key)
+            entropies.append((block, entropy))
             code.extend(code_block)
             block = bitarray(0)
         block.append(bit_text[ind])
@@ -259,7 +268,7 @@ def encrypt(text: str, key: str) -> bitarray:
     code_block = _encrypt(block, bit_key)
     code.extend(code_block)
 
-    return code
+    return code, entropies
 
 
 def decrypt(code: bitarray, key: str) -> bitarray:
@@ -289,7 +298,7 @@ def _test():
 
     text = "Hello, Denys. You are the best!!!"
     key = "arima san"
-    code = encrypt(text, key)
+    code, entropies = encrypt(text, key)
     print(code)
     print(code.tobytes().decode("utf-8", 'replace'))
 
