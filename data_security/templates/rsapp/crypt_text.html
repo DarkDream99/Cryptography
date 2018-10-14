@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'rsapp/scripts/crypt.js' %}"></script>
     <title>Crypt</title>
 </head>
 <body>
@@ -13,9 +15,9 @@
     <label for="input_text">Input text</label>
     <textarea id="input_text" rows="4" cols="50"></textarea>
 
-    <label for="result_byts">Result byts</label>
-    <textarea id="result_byts" rows="4" cols="50">{{res_byts}}</textarea>
+    <label for="result_bytes">Result bytes</label>
+    <textarea id="result_bytes" rows="4" cols="50" readonly></textarea>
 
-    <button>Crypt</button>
+    <button type="button" id="crypt">Crypt</button>
 </body>
 </html>

@@ -96,10 +96,12 @@ def change_text(request, bits=None, *args):
     return render(request, 'rsapp/send_text.html', context)
 
 
-def crypt(request, message=None, *args):
-    if not message:
+def crypt(request, *args):
+    if 'message' not in request.GET:
         context = {}
         return render(request, 'rsapp/crypt_text.html', context)
+    else:
+        message = request.GET['message']
 
     path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
     hpub_client = open(path_to_pub_server, 'rb')
@@ -108,11 +110,7 @@ def crypt(request, message=None, *args):
     global CRYPT_TEXT
     CRYPT_TEXT = cryptorsa.crypt(pub_client, message)
 
-    context = {
-        'res_bytes': CRYPT_TEXT
-    }
-
-    return render(request, 'rsapp/crypt_text.html', context)
+    return JsonResponse([CRYPT_TEXT.decode("utf-8", "replace")], safe=False)
 
 
 def decrypt(request, bits=None, *args):
