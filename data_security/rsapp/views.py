@@ -8,6 +8,8 @@ import pickle
 VIEW_POSITION = os.path.dirname(os.path.realpath(__file__))
 KEYS = set()
 CRYPT_TEXT = b""
+SOURCE_TEXT = ""
+SERVER_URL = ""
 
 
 def index(request):
@@ -56,7 +58,12 @@ def create_keys(request, *args):
         return render(request, 'rsapp/create_keys.html', context)
 
 
-def swap_keys(request, client_key=None, *args):
+def change_server_url(request, *args):
+    global SERVER_URL
+    SERVER_URL = request.GET["server_url"]
+
+
+def swap_keys(request, *args):
     path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
     path_to_priv_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_server.key')
 
@@ -82,32 +89,43 @@ def swap_keys(request, client_key=None, *args):
         pub_server = pickle.load(hpub_server)
 
         context = {
+            'server_url': SERVER_URL,
             'pub_client_key': pub_client,
             'pub_server_key': pub_server
         }
         return render(request, 'rsapp/swap_keys.html', context)
 
-    context = {}
+    context = {
+        'server_url': SERVER_URL,
+    }
     return render(request, 'rsapp/swap_keys.html', context)
 
 
 def change_text(request, bits=None, *args):
-    context = {}
+    context = {
+        'server_url': SERVER_URL,
+    }
     return render(request, 'rsapp/send_text.html', context)
 
 
 def crypt(request, *args):
+    global CRYPT_TEXT
+    global SOURCE_TEXT
+
     if 'message' not in request.GET:
-        context = {}
+        context = {
+            'source_text': SOURCE_TEXT,
+            'crypted_text': CRYPT_TEXT.decode("utf-8", "replace"),
+        }
         return render(request, 'rsapp/crypt_text.html', context)
     else:
         message = request.GET['message']
+        SOURCE_TEXT = message
 
     path_to_pub_client = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
     hpub_client = open(path_to_pub_client, 'rb')
     pub_client = pickle.load(hpub_client)
 
-    global CRYPT_TEXT
     CRYPT_TEXT = cryptorsa.crypt(pub_client, message)
 
     return JsonResponse([CRYPT_TEXT.decode("utf-8", "replace")], safe=False)

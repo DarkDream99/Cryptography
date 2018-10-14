@@ -5,16 +5,21 @@
     <meta charset="UTF-8">
 
     <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'rsapp/scripts/swap_keys.js' %}"></script>
     <title>Swap keys</title>
 </head>
 <body>
     <h1>Swap keys</h1>
+    <label for="server_url">Server URL</label>
+    <textarea id="server_url" rows="4" cols="50">{{server_url}}</textarea>
+
     <label for="client_key">Your key</label>
     <textarea id="client_key" rows="4" cols="50">{{pub_client_key}}</textarea>
 
     <label for="server_key">Server key</label>
     <textarea id="server_key" rows="4" cols="50">{{pub_server_key}}</textarea>
 
-    <button>Swap keys</button>
+    <button id="swap_key">Swap keys</button>
 </body>
 </html>
