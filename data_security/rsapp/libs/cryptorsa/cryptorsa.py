@@ -7,7 +7,7 @@ def crypt(public_key: int, message: str) -> bytes:
     return crypted_message
 
 
-def decrypt(private_key: int, message: str) -> str:
+def decrypt(private_key: int, message: bytes) -> str:
     decrypted_message = rsa.decrypt(message, private_key)
     decrypted_message = decrypted_message.decode('utf-8')
     return decrypted_message

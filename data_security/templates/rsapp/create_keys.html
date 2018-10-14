@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <meta charset="UTF-8">
+
+    <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
+
+    <title>Keys</title>
+</head>
+<body>
+    <h1>Creation keys</h1>
+    <label for="public_key">Public key</label>
+    <textarea id="public_key" rows="4" cols="50"></textarea>
+
+    <label for="private_key">Private key</label>
+    <textarea id="private_key" rows="4" cols="50"></textarea>
+
+    <button>Create keys</button>
+    <button>Create by public key</button>
+</body>
+</html>

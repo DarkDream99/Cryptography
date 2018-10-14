@@ -20,4 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('des/', include('desapp.urls')),
+    path('rsa/', include('rsapp.urls'))
 ]
