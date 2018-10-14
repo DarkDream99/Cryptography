@@ -103,8 +103,8 @@ def crypt(request, *args):
     else:
         message = request.GET['message']
 
-    path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
-    hpub_client = open(path_to_pub_server, 'rb')
+    path_to_pub_client = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
+    hpub_client = open(path_to_pub_client, 'rb')
     pub_client = pickle.load(hpub_client)
 
     global CRYPT_TEXT
@@ -113,6 +113,16 @@ def crypt(request, *args):
     return JsonResponse([CRYPT_TEXT.decode("utf-8", "replace")], safe=False)
 
 
-def decrypt(request, bits=None, *args):
-    context = {}
-    return render(request, 'rsapp/decrypt_bits.html', context)
+def decrypt(request, *args):
+    global CRYPT_TEXT
+    if not CRYPT_TEXT:
+        context = {}
+        return render(request, 'rsapp/decrypt_bits.html', context)
+
+    path_to_priv_client = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
+    hpriv_client = open(path_to_priv_client, 'rb')
+    priv_client = pickle.load(hpriv_client)
+
+    decrypt_text = cryptorsa.decrypt(priv_client, CRYPT_TEXT)
+
+    return JsonResponse([decrypt_text], safe=False)
