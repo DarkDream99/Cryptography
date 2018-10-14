@@ -19,3 +19,8 @@ def swap_keys(request, client_key=None, *args):
 def change_text(request, bits=None, *args):
     context = {}
     return render(request, 'rsapp/send_text.html', context)
+
+
+def crypt(request, message=None, *args):
+    context = {}
+    return render(request, 'rsapp/crypt_text.html', context)
