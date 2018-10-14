@@ -8,4 +8,5 @@ urlpatterns = [
     re_path('swap_keys(\.html)?/', views.swap_keys),
     re_path('send_text(\.html)?/', views.change_text),
     re_path('crypt_text(\.html)?/', views.crypt),
+    re_path('decrypt_bits(\.html)?/', views.decrypt),
 ]

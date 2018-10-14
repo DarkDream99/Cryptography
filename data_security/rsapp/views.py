@@ -24,3 +24,8 @@ def change_text(request, bits=None, *args):
 def crypt(request, message=None, *args):
     context = {}
     return render(request, 'rsapp/crypt_text.html', context)
+
+
+def decrypt(request, bits=None, *args):
+    context={}
+    return render(request, 'rsapp/decrypt_bits.html', context)

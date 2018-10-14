@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <meta charset="UTF-8">
+
+    <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
+    <title>Decrypt</title>
+</head>
+<body>
+    <h1>Decrypt bits</h1>
+
+    <label for="bits">Bits</label>
+    <textarea id="bits" rows="4" cols="50"></textarea>
+
+    <label for="decrypt_text">Decrypted text</label>
+    <textarea id="decrypt_text" rows="4" cols="50"></textarea>
+
+    <button>Decrypt</button>
+</body>
+</html>
