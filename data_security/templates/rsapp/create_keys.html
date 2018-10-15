@@ -4,6 +4,8 @@
     {% load staticfiles %}
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'rsapp/scripts/change_keys.js' %}"></script>
     <title>Keys</title>
 </head>
 <body>
@@ -14,7 +16,7 @@
     <label for="private_key">Private key</label>
     <textarea id="private_key" rows="4" cols="50" readonly>{{private}}</textarea>
 
-    <button>Create keys</button>
+    <button id="change">Create keys</button>
     <!--<button>Create by public key</button>-->
 </body>
 </html>

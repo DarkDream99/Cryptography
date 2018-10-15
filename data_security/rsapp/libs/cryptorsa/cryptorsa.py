@@ -18,3 +18,7 @@ def create_keys():
     return public_key, private_key
 
 
+def create_public_key(e, n):
+    pub_key = rsa.PublicKey(e, n)
+    return pub_key
+

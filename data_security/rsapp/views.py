@@ -17,6 +17,41 @@ def index(request):
     return render(request, 'rsapp/index.html', context)
 
 
+def public_keys(request, *args):
+    path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
+    hpub_client = open(path_to_pub, 'rb')
+    pub_client = pickle.load(hpub_client)
+    return JsonResponse({'e': pub_client.e, 'n': pub_client.n}, safe=False)
+
+
+def server_key(request, *args):
+    if request.POST:
+        e = request.POST['e']
+        n = request.POST['n']
+
+        pub_key = cryptorsa.create_public_key(e, n)
+        path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
+        hpub_server = open(path_to_pub_server, 'wb')
+        pickle.dump(pub_key, hpub_server)
+
+        return JsonResponse(pub_key, safe=True)
+
+
+def change_key(request, *args):
+    path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
+    path_to_priv = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
+
+    pub_key, priv_key = cryptorsa.create_keys()
+
+    hpub_client = open(path_to_pub, 'wb')
+    pickle.dump(pub_key, hpub_client)
+
+    hpriv_client = open(path_to_priv, 'wb')
+    pickle.dump(priv_key, hpriv_client)
+
+    return JsonResponse([repr(pub_key), repr(priv_key)], safe=False)
+
+
 def create_keys(request, *args):
     path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
     path_to_priv = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
@@ -40,8 +75,8 @@ def create_keys(request, *args):
         hpriv_client.close()
 
         context = {
-            'public': pub_key,
-            'private': priv_key
+            'public': pub_key.e,
+            'private': priv_key.d
         }
 
         return render(request, 'rsapp/create_keys.html', context)
@@ -52,8 +87,8 @@ def create_keys(request, *args):
         priv_client = pickle.load(hpriv_client)
 
         context = {
-            'public': pub_client,
-            'private': priv_client
+            'public': pub_client.e,
+            'private': priv_client.d
         }
         return render(request, 'rsapp/create_keys.html', context)
 
@@ -63,7 +98,7 @@ def change_server_url(request, *args):
     SERVER_URL = request.GET["server_url"]
 
 
-def swap_keys(request, *args):
+def gener_swap_keys(request, *args):
     path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
     path_to_priv_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_server.key')
 
