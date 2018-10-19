@@ -1,8 +1,11 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from .libs.cryptorsa import cryptorsa
 import os
 import pickle
+from datetime import datetime
+
+from django.shortcuts import render
+from django.http import JsonResponse
+
+from .libs.cryptorsa import cryptorsa
 
 
 VIEW_POSITION = os.path.dirname(os.path.realpath(__file__))
@@ -13,8 +16,34 @@ SERVER_CRYPT_TEXT = ""
 SERVER_URL = ""
 
 
-def index(request):
+class RSAKey:
+    def __init__(self, public=None, private=None):
+        self.public = public
+        self.private = private
 
+
+class Key(object):
+    def __init__(self, rsa_key: RSAKey=None, date=None):
+        self.rsa_key = rsa_key
+        self.date = date
+
+
+class User(object):
+    def __init__(self, name=None, crypt_key: Key=None):
+        self.name = name
+        self.key = crypt_key
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def __eq__(self, other):
+        return self.name is other.name
+
+
+users = {}
+
+
+def index(request):
     context = {}
     return render(request, 'rsapp/index.html', context)
 
@@ -40,59 +69,44 @@ def server_key(request, *args):
 
 
 def change_key(request, *args):
-    path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
-    path_to_priv = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
+    if request.method == "POST":
+        name = request.POST["name"]
+        pub_key, priv_key = cryptorsa.create_keys()
 
-    pub_key, priv_key = cryptorsa.create_keys()
+        key = Key(
+            rsa_key=RSAKey(pub_key, priv_key),
+            date=datetime.now()
+        )
 
-    hpub_client = open(path_to_pub, 'wb')
-    pickle.dump(pub_key, hpub_client)
+        user = User(name=name, crypt_key=key)
+        users[name] = user
 
-    hpriv_client = open(path_to_priv, 'wb')
-    pickle.dump(priv_key, hpriv_client)
-
-    return JsonResponse([repr(pub_key), repr(priv_key)], safe=False)
+        return JsonResponse([repr(pub_key), repr(priv_key)], safe=False)
 
 
 def create_keys(request, *args):
-    path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
-    path_to_priv = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
+    if request.method == "GET":
+        if "user_name" in request.GET:
+            user_name = request.GET["user_name"]
+            if user_name in users:
+                data = {
+                    "public": repr(users[user_name].key.rsa_key.public),
+                    "private": repr(users[user_name].key.rsa_key.private)
+                }
 
-    if 'priv_client_key' not in KEYS:
+                return JsonResponse(data, safe=False)
+
+    if "user_name" in request.POST:
+        user_name = request.POST["user_name"]
         pub_key, priv_key = cryptorsa.create_keys()
+        key = Key(
+            rsa_key=RSAKey(pub_key, priv_key),
+            date=datetime.now()
+        )
+        user = User(name=user_name, crypt_key=key)
+        users[user_name] = user
 
-        hpub_client = open(path_to_pub, 'wb')
-        pickle.dump(pub_key, hpub_client)
-
-        hpriv_client = open(path_to_priv, 'wb')
-        pickle.dump(priv_key, hpriv_client)
-
-        request.session['pub_client_key'] = path_to_pub
-        request.session['priv_client_key'] = path_to_priv
-
-        KEYS.add('priv_client_key')
-        KEYS.add('pub_client_key')
-
-        hpub_client.close()
-        hpriv_client.close()
-
-        context = {
-            'public': pub_key,
-            'private': priv_key
-        }
-
-        return render(request, 'rsapp/create_keys.html', context)
-    else:
-        hpub_client = open(request.session['pub_client_key'], 'rb')
-        pub_client = pickle.load(hpub_client)
-        hpriv_client = open(request.session['priv_client_key'], 'rb')
-        priv_client = pickle.load(hpriv_client)
-
-        context = {
-            'public': pub_client,
-            'private': priv_client
-        }
-        return render(request, 'rsapp/create_keys.html', context)
+    return render(request, "rsapp/create_keys.html")
 
 
 def change_server_url(request, *args):

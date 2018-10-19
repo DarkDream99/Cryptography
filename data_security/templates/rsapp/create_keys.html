@@ -10,13 +10,22 @@
 </head>
 <body>
     <h1>Creation keys</h1>
-    <label for="public_key">Public key</label>
-    <textarea id="public_key" rows="4" cols="50">{{public}}</textarea>
 
-    <label for="private_key">Private key</label>
-    <textarea id="private_key" rows="4" cols="50" readonly>{{private}}</textarea>
+    <form method="post">
+        {% csrf_token %}
+        <label for="user">User name</label>
+        <textarea id="user_name" name="user_name" rows="4" cols="50"></textarea>
 
-    <button id="change">Create keys</button>
+        <label for="public_key">Public key</label>
+        <textarea id="public_key" rows="4" cols="50">{{public}}</textarea>
+
+        <label for="private_key">Private key</label>
+        <textarea id="private_key" rows="4" cols="50" readonly>{{private}}</textarea>
+
+        <button id="change">Create keys</button>
+    </form>
+
+    <button id="reload">Reload data</button>
     <!--<button>Create by public key</button>-->
 </body>
 </html>
