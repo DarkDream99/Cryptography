@@ -4,6 +4,8 @@
     {% load staticfiles %}
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href=" {% static 'desapp/images/fav.png' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="{% static 'rsapp/scripts/send_text.js' %}"></script>
 
     <title>Send text</title>
 </head>
@@ -17,8 +19,8 @@
     <textarea id="input_bits" rows="4" cols="50"></textarea>
 
     <label for="result_bits">Result bits</label>
-    <textarea id="result_bits" rows="4" cols="50"></textarea>
+    <textarea id="result_bits" rows="4" cols="50" readonly></textarea>
 
-    <button>Send text</button>
+    <button id="send">Send text</button>
 </body>
 </html>

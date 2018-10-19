@@ -9,10 +9,12 @@ VIEW_POSITION = os.path.dirname(os.path.realpath(__file__))
 KEYS = set()
 CRYPT_TEXT = b""
 SOURCE_TEXT = ""
+SERVER_CRYPT_TEXT = ""
 SERVER_URL = ""
 
 
 def index(request):
+
     context = {}
     return render(request, 'rsapp/index.html', context)
 
@@ -21,20 +23,20 @@ def public_keys(request, *args):
     path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
     hpub_client = open(path_to_pub, 'rb')
     pub_client = pickle.load(hpub_client)
-    return JsonResponse({'e': pub_client.e, 'n': pub_client.n}, safe=False)
+    return JsonResponse({'e': str(pub_client.e), 'n': str(pub_client.n)}, safe=False)
 
 
 def server_key(request, *args):
-    if request.POST:
-        e = request.POST['e']
-        n = request.POST['n']
+    if request.GET:
+        e = int(request.GET['e'].replace("\"", ""))
+        n = int(request.GET['n'].replace("\"", ""))
 
         pub_key = cryptorsa.create_public_key(e, n)
         path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
         hpub_server = open(path_to_pub_server, 'wb')
         pickle.dump(pub_key, hpub_server)
 
-        return JsonResponse(pub_key, safe=True)
+        return JsonResponse(repr(pub_key), safe=False)
 
 
 def change_key(request, *args):
@@ -75,8 +77,8 @@ def create_keys(request, *args):
         hpriv_client.close()
 
         context = {
-            'public': pub_key.e,
-            'private': priv_key.d
+            'public': pub_key,
+            'private': priv_key
         }
 
         return render(request, 'rsapp/create_keys.html', context)
@@ -87,8 +89,8 @@ def create_keys(request, *args):
         priv_client = pickle.load(hpriv_client)
 
         context = {
-            'public': pub_client.e,
-            'private': priv_client.d
+            'public': pub_client,
+            'private': priv_client
         }
         return render(request, 'rsapp/create_keys.html', context)
 
@@ -150,25 +152,26 @@ def crypt(request, *args):
     if 'message' not in request.GET:
         context = {
             'source_text': SOURCE_TEXT,
-            'crypted_text': CRYPT_TEXT.decode("utf-8", "replace"),
+            'crypted_text': list(CRYPT_TEXT),
         }
         return render(request, 'rsapp/crypt_text.html', context)
     else:
         message = request.GET['message']
         SOURCE_TEXT = message
 
-    path_to_pub_client = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
-    hpub_client = open(path_to_pub_client, 'rb')
-    pub_client = pickle.load(hpub_client)
+    path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
+    hpub_server = open(path_to_pub_server, 'rb')
+    pub_server = pickle.load(hpub_server)
 
-    CRYPT_TEXT = cryptorsa.crypt(pub_client, message)
+    CRYPT_TEXT = cryptorsa.crypt(pub_server, message)
 
-    return JsonResponse([CRYPT_TEXT.decode("utf-8", "replace")], safe=False)
+    bytes_code_text = [(x - 128) for x in list(CRYPT_TEXT)]
+    return JsonResponse([bytes_code_text], safe=False)
 
 
 def decrypt(request, *args):
-    global CRYPT_TEXT
-    if not CRYPT_TEXT:
+    global SERVER_CRYPT_TEXT
+    if not SERVER_CRYPT_TEXT:
         context = {}
         return render(request, 'rsapp/decrypt_bits.html', context)
 
@@ -176,6 +179,15 @@ def decrypt(request, *args):
     hpriv_client = open(path_to_priv_client, 'rb')
     priv_client = pickle.load(hpriv_client)
 
-    decrypt_text = cryptorsa.decrypt(priv_client, CRYPT_TEXT)
+    decrypt_text = cryptorsa.decrypt(priv_client, SERVER_CRYPT_TEXT)
 
     return JsonResponse([decrypt_text], safe=False)
+
+
+def send_text(request, *args):
+    context = {
+        SERVER_URL
+    }
+
+    return render(request, "rsapp/send_text.html", context)
+
