@@ -1,9 +1,10 @@
 import os
 import pickle
 from datetime import datetime
+import json
 
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 
 from .libs.cryptorsa import cryptorsa
 
@@ -28,6 +29,9 @@ class Key(object):
         self.date = date
 
 
+SERVER_RSA_KEY: Key = None
+
+
 class User(object):
     def __init__(self, name=None, crypt_key: Key=None):
         self.name = name
@@ -40,7 +44,7 @@ class User(object):
         return self.name is other.name
 
 
-users = {}
+USERS = {}
 
 
 def index(request):
@@ -68,27 +72,35 @@ def server_key(request, *args):
         return JsonResponse(repr(pub_key), safe=False)
 
 
+def _create_key() -> Key:
+    pub_key, priv_key = cryptorsa.create_keys()
+    key = Key(
+        rsa_key=RSAKey(pub_key, priv_key),
+        date=datetime.now()
+    )
+
+    return key
+
+
 def create_keys(request, *args):
+    global USERS
+
     if request.method == "GET":
         if "user_name" in request.GET:
             user_name = request.GET["user_name"]
-            if user_name in users:
+            if user_name in USERS:
                 data = {
-                    "public": repr(users[user_name].key.rsa_key.public),
-                    "private": repr(users[user_name].key.rsa_key.private)
+                    "public": repr(USERS[user_name].key.rsa_key.public),
+                    "private": repr(USERS[user_name].key.rsa_key.private)
                 }
 
                 return JsonResponse(data, safe=False)
 
     if "user_name" in request.POST:
         user_name = request.POST["user_name"]
-        pub_key, priv_key = cryptorsa.create_keys()
-        key = Key(
-            rsa_key=RSAKey(pub_key, priv_key),
-            date=datetime.now()
-        )
+        key = _create_key()
         user = User(name=user_name, crypt_key=key)
-        users[user_name] = user
+        USERS[user_name] = user
 
     return render(request, "rsapp/create_keys.html")
 
@@ -144,42 +156,40 @@ def change_text(request, bits=None, *args):
 
 
 def crypt(request, *args):
-    global CRYPT_TEXT
-    global SOURCE_TEXT
+    global SERVER_RSA_KEY
+    if not SERVER_RSA_KEY:
+        SERVER_RSA_KEY = _create_key()
 
-    if 'message' not in request.GET:
-        context = {
-            'source_text': SOURCE_TEXT,
-            'crypted_text': list(CRYPT_TEXT),
-        }
-        return render(request, 'rsapp/crypt_text.html', context)
-    else:
-        message = request.GET['message']
-        SOURCE_TEXT = message
+    if request.method == "GET":
+        if "message" not in request.GET:
+            return render(request, "rsapp/crypt_text.html")
 
-    path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
-    hpub_server = open(path_to_pub_server, 'rb')
-    pub_server = pickle.load(hpub_server)
+        if "message" in request.GET and request.GET["message"]:
+            message = request.GET["message"]
+            crypt_bytes = cryptorsa.crypt(SERVER_RSA_KEY.rsa_key.public, message)
+            crypt_bytes = list(crypt_bytes)
+            return JsonResponse(crypt_bytes, safe=False)
 
-    CRYPT_TEXT = cryptorsa.crypt(pub_server, message)
-
-    bytes_code_text = [(x - 128) for x in list(CRYPT_TEXT)]
-    return JsonResponse([bytes_code_text], safe=False)
+        return HttpResponse("The message field must be entered!", status=400)
 
 
 def decrypt(request, *args):
-    global SERVER_CRYPT_TEXT
-    if not SERVER_CRYPT_TEXT:
-        context = {}
-        return render(request, 'rsapp/decrypt_bits.html', context)
+    if request.method == "GET":
+        if "user_name" not in request.GET:
+            return render(request, "rsapp/crypt_text.html")
 
-    path_to_priv_client = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_client.key')
-    hpriv_client = open(path_to_priv_client, 'rb')
-    priv_client = pickle.load(hpriv_client)
+        if "crypt_bytes" in request.GET and request.GET["crypt_bytes"]:
+            user_name = request.GET["user_name"]
+            crypt_bytes = bytes(json.load(request.GET["crypt_bytes"]))
 
-    decrypt_text = cryptorsa.decrypt(priv_client, SERVER_CRYPT_TEXT)
+            if user_name not in USERS:
+                return HttpResponse("Unauthorized", status=401)
 
-    return JsonResponse([decrypt_text], safe=False)
+            user_key = USERS[user_name]
+            decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
+            return JsonResponse(decrypt_text, safe=False)
+
+    return HttpResponse("The user_name and crypt_bytes fields must be entered!", status=400)
 
 
 def send_text(request, *args):
