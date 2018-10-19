@@ -2,9 +2,12 @@ import os
 import pickle
 from datetime import datetime
 import json
+import requests
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
+from Crypto.Cipher import DES3
+from base64 import b64encode
 
 from .libs.cryptorsa import cryptorsa
 
@@ -14,7 +17,7 @@ KEYS = set()
 CRYPT_TEXT = b""
 SOURCE_TEXT = ""
 SERVER_CRYPT_TEXT = ""
-SERVER_URL = ""
+SERVER_API_URL = ""
 
 
 class RSAKey:
@@ -30,6 +33,7 @@ class Key(object):
 
 
 SERVER_RSA_KEY: Key = None
+SERVER_DES_KEY = b"3r108w5A"
 
 
 class User(object):
@@ -84,7 +88,6 @@ def _create_key() -> Key:
 
 def create_keys(request, *args):
     global USERS
-
     if request.method == "GET":
         if "user_name" in request.GET:
             user_name = request.GET["user_name"]
@@ -106,67 +109,42 @@ def create_keys(request, *args):
 
 
 def change_server_url(request, *args):
-    global SERVER_URL
-    SERVER_URL = request.GET["server_url"]
+    global SERVER_API_URL
+    SERVER_API_URL = request.GET["server_url"]
 
 
 def gener_swap_keys(request, *args):
-    path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
-    path_to_priv_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'priv_server.key')
+    global SERVER_API_URL
+    global SERVER_DES_KEY
 
-    if 'pub_server_key' not in KEYS:
-        pub_key, priv_key = cryptorsa.create_keys()
-
-        hpub_server = open(path_to_pub_server, 'wb')
-        hpriv_server = open(path_to_priv_server, 'wb')
-
-        pickle.dump(pub_key, hpub_server)
-        pickle.dump(priv_key, hpriv_server)
-
-        request.session['pub_server_key'] = path_to_pub_server
-        request.session['priv_server_key'] = path_to_priv_server
-
-        hpub_server.close()
-        hpriv_server.close()
-
-    if 'pub_client_key' in KEYS:
-        hpub_client = open(request.session['pub_client_key'], 'rb')
-        pub_client = pickle.load(hpub_client)
-        hpub_server = open(request.session['pub_server_key'], 'rb')
-        pub_server = pickle.load(hpub_server)
-
+    if request.method == "GET":
         context = {
-            'server_url': SERVER_URL,
-            'pub_client_key': pub_client,
-            'pub_server_key': pub_server
+            "server_url": SERVER_API_URL
         }
-        return render(request, 'rsapp/swap_keys.html', context)
+        return render(request, "rsapp/swap_keys.html")
 
-    context = {
-        'server_url': SERVER_URL,
-    }
-    return render(request, 'rsapp/swap_keys.html', context)
-
-
-def change_text(request, bits=None, *args):
-    context = {
-        'server_url': SERVER_URL,
-    }
-    return render(request, 'rsapp/send_text.html', context)
+    if "server_url" in request.POST:
+        SERVER_API_URL = request.POST["server_url"]
+        SERVER_DES_KEY = "KaVaBanGATurtleWithUs"
+        req_data = {"des_key": SERVER_DES_KEY}
+        requests.post(SERVER_API_URL, json=req_data)
 
 
 def crypt(request, *args):
-    global SERVER_RSA_KEY
-    if not SERVER_RSA_KEY:
-        SERVER_RSA_KEY = _create_key()
+    global USERS
 
     if request.method == "GET":
         if "message" not in request.GET:
             return render(request, "rsapp/crypt_text.html")
 
+        user_name = request.GET["user_name"]
+        if user_name not in USERS:
+            return HttpResponse("Unauthorized", status=401)
+
         if "message" in request.GET and request.GET["message"]:
             message = request.GET["message"]
-            crypt_bytes = cryptorsa.crypt(SERVER_RSA_KEY.rsa_key.public, message)
+            user_key = USERS[user_name].key
+            crypt_bytes = cryptorsa.crypt(user_key.rsa_key.public, message)
             crypt_bytes = list(crypt_bytes)
             return JsonResponse(crypt_bytes, safe=False)
 
@@ -174,28 +152,67 @@ def crypt(request, *args):
 
 
 def decrypt(request, *args):
+    global USERS
+
     if request.method == "GET":
         if "user_name" not in request.GET:
-            return render(request, "rsapp/crypt_text.html")
+            return render(request, "rsapp/decrypt_bits.html")
 
         if "crypt_bytes" in request.GET and request.GET["crypt_bytes"]:
             user_name = request.GET["user_name"]
-            crypt_bytes = bytes(json.load(request.GET["crypt_bytes"]))
+            json_bytes = json.loads(request.GET["crypt_bytes"])
+            crypt_bytes = bytes(json_bytes)
 
             if user_name not in USERS:
                 return HttpResponse("Unauthorized", status=401)
 
-            user_key = USERS[user_name]
+            user_key = USERS[user_name].key
             decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
             return JsonResponse(decrypt_text, safe=False)
 
     return HttpResponse("The user_name and crypt_bytes fields must be entered!", status=400)
 
 
-def send_text(request, *args):
-    context = {
-        SERVER_URL
-    }
+def _encrypt_des(message: str, key: str) -> bytes:
+    des_gener = DES3.new(key, DES3.MODE_CTR)
+    return b64encode(des_gener.encrypt(message.encode("utf-8")))
 
+
+def send_text(request, *args):
+    global SERVER_API_URL
+    global USERS
+    global SERVER_DES_KEY
+
+    if request.method == "GET":
+        context = {
+            "server_url": SERVER_API_URL
+        }
+        return render(request, "rsapp/send_text.html", context)
+
+    if "user_name" in request.POST:
+        user_name = request.POST["user_name"]
+        if "server_url" in request.POST:
+            SERVER_API_URL = request.POST["server_url"]
+            if "crypt_bytes" in request.POST:
+                crypt_bytes = [int(x) for x in request.POST["crypt_bytes"].split(',')]
+                crypt_bytes = bytes(crypt_bytes)
+
+                if user_name in USERS:
+                    user_key = USERS[user_name].key
+                    decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
+                    decrypt_text += "\n--Written by " + user_name + "--\n"
+
+                    encrypt_des = _encrypt_des(decrypt_text, SERVER_DES_KEY)
+                    response_data = {
+                        "des_message": encrypt_des
+                    }
+                    requests.post(SERVER_API_URL, json=response_data)
+
+    context = {
+        "server_url": SERVER_API_URL
+    }
     return render(request, "rsapp/send_text.html", context)
+
+
+
 

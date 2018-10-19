@@ -12,15 +12,22 @@
 <body>
     <h1>Send text</h1>
 
-    <label for="server_url">Server URL</label>
-    <textarea id="server_url" rows="4" cols="50">{{server_url}}</textarea>
+    <form method="post">
+        {% csrf_token %}
 
-    <label for="input_bits">Input bits</label>
-    <textarea id="input_bits" rows="4" cols="50"></textarea>
+        <label for="server_url">Server URL</label>
+        <textarea id="server_url" name="server_url" rows="4" cols="50">{{server_url}}</textarea>
 
-    <label for="result_bits">Result bits</label>
-    <textarea id="result_bits" rows="4" cols="50" readonly></textarea>
+        <label for="user">User name</label>
+        <textarea id="user_name" name="user_name" rows="4" cols="50"></textarea>
 
-    <button id="send">Send text</button>
+        <label for="input_bits">Input bits</label>
+        <textarea id="input_bits" name="crypt_bytes" rows="4" cols="50"></textarea>
+
+        <label for="result_bits">Result bits</label>
+        <textarea id="result_bits" rows="4" cols="50" readonly></textarea>
+
+        <button type="submit" id="send">Send text</button>
+    </form>
 </body>
 </html>
