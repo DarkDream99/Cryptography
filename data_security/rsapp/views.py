@@ -68,22 +68,6 @@ def server_key(request, *args):
         return JsonResponse(repr(pub_key), safe=False)
 
 
-def change_key(request, *args):
-    if request.method == "POST":
-        name = request.POST["name"]
-        pub_key, priv_key = cryptorsa.create_keys()
-
-        key = Key(
-            rsa_key=RSAKey(pub_key, priv_key),
-            date=datetime.now()
-        )
-
-        user = User(name=name, crypt_key=key)
-        users[name] = user
-
-        return JsonResponse([repr(pub_key), repr(priv_key)], safe=False)
-
-
 def create_keys(request, *args):
     if request.method == "GET":
         if "user_name" in request.GET:
