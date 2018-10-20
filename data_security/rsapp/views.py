@@ -33,7 +33,7 @@ class Key(object):
 
 
 SERVER_RSA_KEY: Key = None
-SERVER_DES_KEY = 121551651316848151456313494561346549
+SERVER_DES_KEY = 1215516513
 
 
 class User(object):
@@ -54,26 +54,6 @@ USERS = {}
 def index(request):
     context = {}
     return render(request, 'rsapp/index.html', context)
-
-
-def public_keys(request, *args):
-    path_to_pub = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_client.key')
-    hpub_client = open(path_to_pub, 'rb')
-    pub_client = pickle.load(hpub_client)
-    return JsonResponse({'e': str(pub_client.e), 'n': str(pub_client.n)}, safe=False)
-
-
-def server_key(request, *args):
-    if request.GET:
-        e = int(request.GET['e'].replace("\"", ""))
-        n = int(request.GET['n'].replace("\"", ""))
-
-        pub_key = cryptorsa.create_public_key(e, n)
-        path_to_pub_server = os.path.join(VIEW_POSITION, 'files', 'obj', 'pub_server.key')
-        hpub_server = open(path_to_pub_server, 'wb')
-        pickle.dump(pub_key, hpub_server)
-
-        return JsonResponse(repr(pub_key), safe=False)
 
 
 def _create_key() -> Key:
@@ -106,27 +86,6 @@ def create_keys(request, *args):
         USERS[user_name] = user
 
     return render(request, "rsapp/create_keys.html")
-
-
-def change_server_url(request, *args):
-    global SERVER_API_URL
-    SERVER_API_URL = request.GET["server_url"]
-
-
-def gener_swap_keys(request, *args):
-    global SERVER_API_URL
-    global SERVER_DES_KEY
-
-    if request.method == "GET":
-        context = {
-            "server_url": SERVER_API_URL
-        }
-        return render(request, "rsapp/swap_keys.html")
-
-    if "server_url" in request.POST:
-        SERVER_API_URL = request.POST["server_url"]
-        req_data = {"des_key": SERVER_DES_KEY}
-        requests.post(SERVER_API_URL, json=req_data)
 
 
 def crypt(request, *args):
@@ -172,19 +131,9 @@ def decrypt(request, *args):
     return HttpResponse("The user_name and crypt_bytes fields must be entered!", status=400)
 
 
-def _pad(s):
-    return s + (DES.block_size - len(s) % DES.block_size) * \
-        chr(DES.block_size - len(s) % DES.block_size)
-
-
-def _encrypt_des(message: str, key: str) -> bytes:
-    des_gener = DES.new(key, DES.MODE_CTR)
-    return b64encode(des_gener.encrypt(_pad(message)))
-
-
 def _encrypt_xor(message: str, key: int) -> list:
     res_bytes = list(bytes(message.encode("utf-8")))
-    res_bytes = [x ^ key for x in res_bytes]
+    res_bytes = [(x - 127) ^ key for x in res_bytes]
     return res_bytes
 
 
