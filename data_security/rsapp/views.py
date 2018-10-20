@@ -1,22 +1,21 @@
 import os
-import pickle
 from datetime import datetime
 import json
 import requests
+import pickle
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from Crypto.Cipher import DES
-from base64 import b64encode
+from .models import User as UserModel
 
 from .libs.cryptorsa import cryptorsa
 
 
 VIEW_POSITION = os.path.dirname(os.path.realpath(__file__))
-KEYS = set()
-CRYPT_TEXT = b""
-SOURCE_TEXT = ""
-SERVER_CRYPT_TEXT = ""
+# KEYS = set()
+# CRYPT_TEXT = b""
+# SOURCE_TEXT = ""
+# SERVER_CRYPT_TEXT = ""
 SERVER_API_URL = ""
 
 
@@ -51,6 +50,25 @@ class User(object):
 USERS = {}
 
 
+def _create_user(user_name: str, key: Key=None) -> User:
+    key = _create_key() if not key else key
+    user = User(name=user_name, crypt_key=key)
+    return user
+
+
+def _load_users():
+    global USERS
+    user_objects = UserModel.objects.all()
+
+    for user in user_objects:
+        name = user.name
+        key = pickle.loads(user.key)
+        USERS[name] = _create_user(name, key)
+
+
+_load_users()
+
+
 def index(request):
     context = {}
     return render(request, 'rsapp/index.html', context)
@@ -81,9 +99,15 @@ def create_keys(request, *args):
 
     if "user_name" in request.POST:
         user_name = request.POST["user_name"]
-        key = _create_key()
-        user = User(name=user_name, crypt_key=key)
-        USERS[user_name] = user
+        USERS[user_name] = _create_user(user_name)
+
+        user_objs = UserModel.objects.filter(name=user_name)
+        if user_objs:
+            user_objs[0].key = USERS[user_name].key
+            user_objs[0].save()
+        else:
+            user_obj = UserModel.objects.create(name=user_name, key=pickle.dumps(USERS[user_name].key))
+            user_obj.save()
 
     return render(request, "rsapp/create_keys.html")
 
@@ -165,7 +189,7 @@ def send_text(request, *args):
                     response_data = {
                         "des_message": encrypt_des
                     }
-                    requests.post(SERVER_API_URL, json=response_data)
+                    requests.post(SERVER_API_URL, json=json.dumps(response_data))
 
     context = {
         "server_url": SERVER_API_URL
