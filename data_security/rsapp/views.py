@@ -6,7 +6,7 @@ import requests
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from Crypto.Cipher import DES3
+from Crypto.Cipher import DES
 from base64 import b64encode
 
 from .libs.cryptorsa import cryptorsa
@@ -33,7 +33,7 @@ class Key(object):
 
 
 SERVER_RSA_KEY: Key = None
-SERVER_DES_KEY = b"3r108w5A"
+SERVER_DES_KEY = 121551651316848151456313494561346549
 
 
 class User(object):
@@ -125,7 +125,6 @@ def gener_swap_keys(request, *args):
 
     if "server_url" in request.POST:
         SERVER_API_URL = request.POST["server_url"]
-        SERVER_DES_KEY = "KaVaBanGATurtleWithUs"
         req_data = {"des_key": SERVER_DES_KEY}
         requests.post(SERVER_API_URL, json=req_data)
 
@@ -173,9 +172,20 @@ def decrypt(request, *args):
     return HttpResponse("The user_name and crypt_bytes fields must be entered!", status=400)
 
 
+def _pad(s):
+    return s + (DES.block_size - len(s) % DES.block_size) * \
+        chr(DES.block_size - len(s) % DES.block_size)
+
+
 def _encrypt_des(message: str, key: str) -> bytes:
-    des_gener = DES3.new(key, DES3.MODE_CTR)
-    return b64encode(des_gener.encrypt(message.encode("utf-8")))
+    des_gener = DES.new(key, DES.MODE_CTR)
+    return b64encode(des_gener.encrypt(_pad(message)))
+
+
+def _encrypt_xor(message: str, key: int) -> list:
+    res_bytes = list(bytes(message.encode("utf-8")))
+    res_bytes = [x ^ key for x in res_bytes]
+    return res_bytes
 
 
 def send_text(request, *args):
@@ -202,7 +212,7 @@ def send_text(request, *args):
                     decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
                     decrypt_text += "\n--Written by " + user_name + "--\n"
 
-                    encrypt_des = _encrypt_des(decrypt_text, SERVER_DES_KEY)
+                    encrypt_des = _encrypt_xor(decrypt_text, SERVER_DES_KEY)
                     response_data = {
                         "des_message": encrypt_des
                     }
@@ -212,7 +222,3 @@ def send_text(request, *args):
         "server_url": SERVER_API_URL
     }
     return render(request, "rsapp/send_text.html", context)
-
-
-
-
