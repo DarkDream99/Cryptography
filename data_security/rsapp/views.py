@@ -18,6 +18,7 @@ SERVER_API_URL = ""
 
 
 class RSAKey:
+
     def __init__(self, public=None, private=None):
         self.public = public
         self.private = private
@@ -34,6 +35,7 @@ SERVER_DES_KEY = 1215516513
 
 
 class User(object):
+
     def __init__(self, name=None, crypt_key: Key=None):
         self.name = name
         self.key = crypt_key
@@ -236,32 +238,38 @@ def _encrypt_xor(message: str, key: int) -> list:
 
 
 def send_text(request, *args):
-    global SERVER_API_URL
-    global USERS
-    global SERVER_DES_KEY
-
     if request.method == "GET":
-        context = {
-            "server_url": SERVER_API_URL
-        }
-        return render(request, "rsapp/send_text.html", context)
+        return load_send_text_page(request)
 
-    if "user_name" in request.POST:
-        user_name = request.POST["user_name"]
-        if "server_url" in request.POST:
-            SERVER_API_URL = request.POST["server_url"]
-            if "crypt_bytes" in request.POST:
-                crypt_bytes = [int(x) for x in request.POST["crypt_bytes"].split(',')]
-                crypt_bytes = bytes(crypt_bytes)
+    send_text_post(request)
 
-                if user_name in USERS:
-                    user_key = USERS[user_name].key
-                    decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
-                    decrypt_text = "\n--Written by " + user_name + "--\n" + decrypt_text
+    return load_send_text_page(request)
 
-                    encrypt_des = _encrypt_xor(decrypt_text, SERVER_DES_KEY)
-                    requests.post(SERVER_API_URL, json=encrypt_des)
 
+@post_filled("user_name")
+@post_filled("server_url")
+@post_filled("crypt_bytes")
+def send_text_post(request):
+    global SERVER_API_URL
+    global SERVER_DES_KEY
+    global USERS
+
+    user_name = request.POST["user_name"]
+    SERVER_API_URL = request.POST["server_url"]
+
+    crypt_bytes = [int(x) for x in request.POST["crypt_bytes"].split(',')]
+    crypt_bytes = bytes(crypt_bytes)
+
+    if user_name in USERS:
+        user_key = USERS[user_name].key
+        decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
+        decrypt_text = "\n--Written by " + user_name + "--\n" + decrypt_text
+
+        encrypt_des = _encrypt_xor(decrypt_text, SERVER_DES_KEY)
+        requests.post(SERVER_API_URL, json=encrypt_des)
+
+
+def load_send_text_page(request):
     context = {
         "server_url": SERVER_API_URL
     }
