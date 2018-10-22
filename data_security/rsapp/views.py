@@ -1,21 +1,19 @@
 import os
-from datetime import datetime
 import json
 import requests
 import pickle
+from datetime import datetime
+from functools import wraps
 
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from .models import User as UserModel
+from base64 import b64encode
 
 from .libs.cryptorsa import cryptorsa
 
 
 VIEW_POSITION = os.path.dirname(os.path.realpath(__file__))
-# KEYS = set()
-# CRYPT_TEXT = b""
-# SOURCE_TEXT = ""
-# SERVER_CRYPT_TEXT = ""
 SERVER_API_URL = ""
 
 
@@ -84,31 +82,106 @@ def _create_key() -> Key:
     return key
 
 
-def create_keys(request, *args):
+def get_requested(template_url):
+    def get_request(source_func):
+        @wraps(source_func)
+        def wrapper(request, *args, **kwargs):
+            if request.method == "GET":
+                return source_func(request, *args, **kwargs)
+            return render(request, template_url)
+
+        return wrapper
+
+    return get_request
+
+
+def get_filled(*fields):
+    def get_fill(source_func):
+        @wraps(source_func)
+        def wrapper(request, *args, **kwargs):
+            for field in fields:
+                if field not in request.GET or not request.GET[field]:
+                    return None
+
+            return source_func(request, *args, **kwargs)
+
+        return wrapper
+
+    return get_fill
+
+
+def post_filled(*fields):
+    def post_fill(source_func):
+        @wraps(source_func)
+        def wrapper(request, *args, **kwargs):
+            for field in fields:
+                if field not in request.POST or not request.POST[field]:
+                    return None
+
+            return source_func(request, *args, **kwargs)
+
+        return wrapper
+
+    return post_fill
+
+
+def rsa_key_refreshed(user_name: str):
     global USERS
+
+    user = USERS[user_name]
+    key = user.key
+    curr_date = datetime.now()
+
+    date_delta = curr_date - key.date
+    if date_delta.seconds > 30:
+        USERS[user_name].key = _create_key()
+        user_obj = UserModel.objects.filter(name=user_name)[0]
+        user_obj.key = pickle.dumps(USERS[user_name].key)
+        user_obj.save()
+
+
+@get_filled("user_name")
+def _create_keys_get(request, *args):
+    global USERS
+
+    user_name = request.GET["user_name"]
+    if user_name in USERS:
+        rsa_key_refreshed(user_name)
+        data = {
+            "public": repr(USERS[user_name].key.rsa_key.public),
+            "private": repr(USERS[user_name].key.rsa_key.private)
+        }
+        return JsonResponse(data, safe=False)
+
+    return HttpResponse("Unauthorized", status=401)
+
+
+@post_filled("user_name")
+def _create_keys_post(request, *args):
+    global USERS
+
+    user_name = request.POST["user_name"]
+    USERS[user_name] = _create_user(user_name)
+
+    user_objs = UserModel.objects.filter(name=user_name)
+    if user_objs:
+        user_objs[0].key = pickle.dumps(USERS[user_name].key)
+        user_objs[0].save()
+    else:
+        user_obj = UserModel.objects.create(
+            name=user_name,
+            key=pickle.dumps(USERS[user_name].key))
+        user_obj.save()
+
+
+def create_keys(request, *args):
     if request.method == "GET":
-        if "user_name" in request.GET:
-            user_name = request.GET["user_name"]
-            if user_name in USERS:
-                data = {
-                    "public": repr(USERS[user_name].key.rsa_key.public),
-                    "private": repr(USERS[user_name].key.rsa_key.private)
-                }
+        response = _create_keys_get(request, *args)
+        if not response:
+            return render(request, "rsapp/create_keys.html")
+        return response
 
-                return JsonResponse(data, safe=False)
-
-    if "user_name" in request.POST:
-        user_name = request.POST["user_name"]
-        USERS[user_name] = _create_user(user_name)
-
-        user_objs = UserModel.objects.filter(name=user_name)
-        if user_objs:
-            user_objs[0].key = USERS[user_name].key
-            user_objs[0].save()
-        else:
-            user_obj = UserModel.objects.create(name=user_name, key=pickle.dumps(USERS[user_name].key))
-            user_obj.save()
-
+    _create_keys_post(request, *args)
     return render(request, "rsapp/create_keys.html")
 
 
@@ -123,6 +196,7 @@ def crypt(request, *args):
         if user_name not in USERS:
             return HttpResponse("Unauthorized", status=401)
 
+        rsa_key_refreshed(user_name)
         if "message" in request.GET and request.GET["message"]:
             message = request.GET["message"]
             user_key = USERS[user_name].key
@@ -156,8 +230,8 @@ def decrypt(request, *args):
 
 
 def _encrypt_xor(message: str, key: int) -> list:
-    res_bytes = list(bytes(message.encode("utf-8")))
-    res_bytes = [(x - 127) ^ key for x in res_bytes]
+    res_bytes = list(bytes(b64encode(message.encode("utf-8"))))
+    res_bytes = [x ^ key for x in res_bytes]
     return res_bytes
 
 
@@ -183,13 +257,10 @@ def send_text(request, *args):
                 if user_name in USERS:
                     user_key = USERS[user_name].key
                     decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
-                    decrypt_text += "\n--Written by " + user_name + "--\n"
+                    decrypt_text = "\n--Written by " + user_name + "--\n" + decrypt_text
 
                     encrypt_des = _encrypt_xor(decrypt_text, SERVER_DES_KEY)
-                    response_data = {
-                        "des_message": encrypt_des
-                    }
-                    requests.post(SERVER_API_URL, json=json.dumps(response_data))
+                    requests.post(SERVER_API_URL, json=encrypt_des)
 
     context = {
         "server_url": SERVER_API_URL
