@@ -187,6 +187,20 @@ def create_keys(request, *args):
     return render(request, "rsapp/create_keys.html")
 
 
+def _crypt_rsa(pub_rsa_key, message) -> list:
+    res = []
+    delta = 20
+    left, right = 0, delta
+
+    while right < len(message):
+        res_bytes = cryptorsa.crypt(pub_rsa_key, message[left:right])
+        res.append(list(res_bytes))
+        left = right
+        right += delta
+
+    return res
+
+
 def crypt(request, *args):
     global USERS
 
@@ -202,11 +216,24 @@ def crypt(request, *args):
         if "message" in request.GET and request.GET["message"]:
             message = request.GET["message"]
             user_key = USERS[user_name].key
-            crypt_bytes = cryptorsa.crypt(user_key.rsa_key.public, message)
-            crypt_bytes = list(crypt_bytes)
+            crypt_bytes = _crypt_rsa(user_key.rsa_key.public, message)
             return JsonResponse(crypt_bytes, safe=False)
 
         return HttpResponse("The message field must be entered!", status=400)
+
+
+def _rsa_decrypt(priv_rsa_key, crypt_bytes: list) -> str:
+    res = ""
+    delta = 64
+    left, right = 0, delta
+
+    while right < len(crypt_bytes):
+        decrypt_text = cryptorsa.decrypt(priv_rsa_key, bytes(crypt_bytes[left:right]))
+        res += decrypt_text
+        left = right
+        right += delta
+
+    return res
 
 
 def decrypt(request, *args):
@@ -219,13 +246,12 @@ def decrypt(request, *args):
         if "crypt_bytes" in request.GET and request.GET["crypt_bytes"]:
             user_name = request.GET["user_name"]
             json_bytes = json.loads(request.GET["crypt_bytes"])
-            crypt_bytes = bytes(json_bytes)
 
             if user_name not in USERS:
                 return HttpResponse("Unauthorized", status=401)
 
             user_key = USERS[user_name].key
-            decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
+            decrypt_text = _rsa_decrypt(user_key.rsa_key.private, json_bytes)
             return JsonResponse(decrypt_text, safe=False)
 
     return HttpResponse("The user_name and crypt_bytes fields must be entered!", status=400)
@@ -258,12 +284,11 @@ def send_text_post(request):
     SERVER_API_URL = request.POST["server_url"]
 
     crypt_bytes = [int(x) for x in request.POST["crypt_bytes"].split(',')]
-    crypt_bytes = bytes(crypt_bytes)
 
     if user_name in USERS:
         user_key = USERS[user_name].key
-        decrypt_text = cryptorsa.decrypt(user_key.rsa_key.private, crypt_bytes)
-        decrypt_text = "\n--Written by " + user_name + "--\n" + decrypt_text
+        decrypt_text = _rsa_decrypt(user_key.rsa_key.private, crypt_bytes)
+        decrypt_text = user_name + ":\n" + decrypt_text
 
         encrypt_des = _encrypt_xor(decrypt_text, SERVER_DES_KEY)
         requests.post(SERVER_API_URL, json=encrypt_des)
